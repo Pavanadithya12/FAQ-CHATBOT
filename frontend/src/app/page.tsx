@@ -56,7 +56,7 @@ export default function FAQChatbot() {
   const [inputQuery, setInputQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [threshold, setThreshold] = useState(0.65);
-  const [apiUrl, setApiUrl] = useState("http://localhost:8000");
+  const [apiUrl, setApiUrl] = useState("");
   const [showSettings, setShowSettings] = useState(false);
   const [backendStatus, setBackendStatus] = useState<"connected" | "disconnected" | "checking">("checking");
   const [expandedSources, setExpandedSources] = useState<Record<string, boolean>>({});
