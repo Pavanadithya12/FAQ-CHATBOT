@@ -50,11 +50,11 @@ This project implements an enterprise-grade, retrieval-augmented FAQ chatbot bas
 
 ```
 FAQCHATBOT/
-├── PROJECT_MANAGEMENT_DAILY_UPDATES.md  # 📅 Pre-written daily status emails for your reporting manager
 ├── README.md                            # 📖 Project documentation & running guide
+├── start_all.bat                        # ⚡ One-click Windows runner
 ├── backend/
 │   ├── data/
-│   │   └── faq_data.json                # 52 Curated FAQs across 6 business categories
+│   │   └── faq_data.json                # 50 Curated FAQs across business categories
 │   ├── services/
 │   │   ├── embeddings.py                # Vector embedding generator (SentenceTransformers / Local / OpenAI)
 │   │   ├── pinecone_service.py          # Pinecone cloud vector DB client with local memory fallback
@@ -139,8 +139,4 @@ Open your browser at `http://localhost:3000`.
 | **Out-of-Scope Fallback** | *"What is the recipe for chocolate cake?"* | Query Router routes to Fallback Handler with polite rejection and 3 suggested FAQ topics. |
 | **Threshold Slider** | Slide threshold to 0.95 in UI | Demonstrates strict gating where low-confidence queries trigger fallback instead of hallucinating. |
 
----
 
-## 👔 Daily Manager Updates
-For the exact daily email and Slack update templates to send your strict manager for **Day 1 through Day 7**, see:  
-👉 [`PROJECT_MANAGEMENT_DAILY_UPDATES.md`](./PROJECT_MANAGEMENT_DAILY_UPDATES.md)

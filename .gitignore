@@ -28,3 +28,9 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Private personal files & packages
+PROJECT_MANAGEMENT_DAILY_UPDATES.md
+SIX_DAY_ABSENCE_PLAN.md
+*.zip
+*.db
