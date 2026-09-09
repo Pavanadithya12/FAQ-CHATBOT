@@ -21,35 +21,62 @@ const OUT_OF_SCOPE_KEYWORDS = [
 ];
 
 const VAGUE_MAPPINGS: Record<string, string> = {
-  "money back": "how to request a refund and refund policy",
-  "cash back": "how to request a refund and refund policy",
-  "want my money": "how to request a refund and refund policy",
-  "give refund": "how to request a refund and refund policy",
-  "forgot pass": "how do I reset my account password",
-  "lost password": "how do I reset my account password",
-  "cant login": "how do I reset my account password",
-  "change pass": "how do I reset my account password",
-  "forgot credentials": "how do I reset my account password",
-  "lost credentials": "how do I reset my account password",
-  "login credentials": "how do I reset my account password",
-  "where is my stuff": "how do I track my order or package shipment",
-  "package status": "how do I track my order or package shipment",
-  "track parcel": "how do I track my order or package shipment",
-  "pay methods": "what payment methods are accepted",
-  "how to pay": "what payment methods are accepted",
-  "cards accepted": "what payment methods are accepted",
-  "stop plan": "how do I cancel my paid subscription",
-  "stop subscription": "how do I cancel my paid subscription",
-  "cancel membership": "how do I cancel my paid subscription",
-  "broken item": "what should I do if my items arrived damaged or defective",
-  "damaged package": "what should I do if my items arrived damaged or defective",
-  "dark mode": "is dark mode theme available in the application",
-  "night theme": "is dark mode theme available in the application",
-  "talk to person": "how can I contact human customer support",
-  "human support": "how can I contact human customer support"
+  // Category 7: Orders, Shipping & Parcel Tracking
+  "track shipment": "How can I track the live delivery status of my physical shipment?",
+  "track my shipment": "How can I track the live delivery status of my physical shipment?",
+  "track parcel": "How can I track the live delivery status of my physical shipment?",
+  "track package": "How can I track the live delivery status of my physical shipment?",
+  "track order": "How can I track the live delivery status of my physical shipment?",
+  "where is my stuff": "How can I track the live delivery status of my physical shipment?",
+  "where is my package": "How can I track the live delivery status of my physical shipment?",
+  "shipping time": "What are your standard and expedited shipping delivery estimates?",
+  "delivery time": "What are your standard and expedited shipping delivery estimates?",
+  "delivery estimate": "What are your standard and expedited shipping delivery estimates?",
+  "express delivery": "What are your standard and expedited shipping delivery estimates?",
+  "overnight shipping": "What are your standard and expedited shipping delivery estimates?",
+  "change address": "Can I edit the destination address after placing an order?",
+  "update address": "Can I edit the destination address after placing an order?",
+  "wrong address": "Can I edit the destination address after placing an order?",
+  "international delivery": "Do you deliver internationally to all global countries?",
+  "international shipping": "Do you deliver internationally to all global countries?",
+  "worldwide shipping": "Do you deliver internationally to all global countries?",
+  "damaged shipment": "What steps should I take if my shipment arrives damaged or missing items?",
+  "damaged package": "What steps should I take if my shipment arrives damaged or missing items?",
+  "broken goods": "What steps should I take if my shipment arrives damaged or missing items?",
+  "arrived broken": "What steps should I take if my shipment arrives damaged or missing items?",
+  "arrived damaged": "What steps should I take if my shipment arrives damaged or missing items?",
+
+  // Account & Setup
+  "forgot pass": "How can I reset my forgotten password?",
+  "lost password": "How can I reset my forgotten password?",
+  "cant login": "How can I reset my forgotten password?",
+  "reset password": "How can I reset my forgotten password?",
+  "forgot credentials": "How can I reset my forgotten password?",
+  "2fa": "How do I configure Two-Factor Authentication (2FA)?",
+  "two factor": "How do I configure Two-Factor Authentication (2FA)?",
+  "account locked": "Why is my account locked and how do I unlock it?",
+
+  // Billing & Subscriptions
+  "money back": "What is the standard refund policy?",
+  "refund policy": "What is the standard refund policy?",
+  "pricing plans": "What subscription plans are available?",
+  "subscription cost": "What subscription plans are available?",
+  "cancel subscription": "How do I cancel my active subscription?",
+  "stop plan": "How do I cancel my active subscription?",
+  "download invoice": "Where can I download my monthly tax invoices and receipts?",
+  "tax invoice": "Where can I download my monthly tax invoices and receipts?",
+  "pay methods": "What payment methods and currencies do you support?",
+  "payment methods": "What payment methods and currencies do you support?",
+
+  // Features & Support
+  "dark mode": "How do I enable Dark Mode theme in the web application?",
+  "night theme": "How do I enable Dark Mode theme in the web application?",
+  "talk to person": "How do I contact human customer support?",
+  "human support": "How do I contact human customer support?",
+  "contact support": "How do I contact human customer support?",
+  "shortcuts": "What keyboard shortcuts are available to speed up navigation?"
 };
 
-// Generates a deterministic 384-dimensional vector representation
 function getVector(text: string, dimension = 384): number[] {
   const vec = new Array(dimension).fill(0);
   const words = text.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/).filter(Boolean);
@@ -100,9 +127,9 @@ export async function POST(req: NextRequest) {
         is_fallback: true,
         route: "EMPTY",
         suggested_questions: [
-          "What is this platform and how does it work?",
-          "How do I reset my account password?",
-          "What is your refund policy?"
+          "How can I track the live delivery status of my physical shipment?",
+          "What are your standard and expedited shipping delivery estimates?",
+          "Can I edit the destination address after placing an order?"
         ]
       });
     }
@@ -112,15 +139,15 @@ export async function POST(req: NextRequest) {
     // Step 4: Query Router - Greeting Check
     if (GREETINGS.has(cleanLower)) {
       return NextResponse.json({
-        answer: "Hello! 👋 I am your automated Customer Support FAQ Assistant. How can I help you today? Feel free to ask about passwords, billing, orders, or refunds!",
+        answer: "Hello! 👋 I am your automated Customer Support FAQ Assistant. How can I help you today? Feel free to ask about orders, shipping tracking, billing, or refunds!",
         confidence_score: 1.0,
         threshold,
         is_fallback: false,
         route: "GREETING",
         suggested_questions: [
-          "How do I reset my account password?",
-          "What is your refund policy?",
-          "What payment methods are accepted?"
+          "How can I track the live delivery status of my physical shipment?",
+          "What are your standard and expedited shipping delivery estimates?",
+          "Can I edit the destination address after placing an order?"
         ]
       });
     }
@@ -129,15 +156,15 @@ export async function POST(req: NextRequest) {
     for (const pattern of OUT_OF_SCOPE_KEYWORDS) {
       if (cleanLower.includes(pattern)) {
         return NextResponse.json({
-          answer: "I apologize, but that topic is outside our FAQ knowledge base. I can assist with account security, billing, orders, shipping, refunds, and technical support.",
+          answer: "I apologize, but that topic is outside our FAQ knowledge base. I can assist with orders, shipment tracking, billing, account security, and technical support.",
           confidence_score: 0.0,
           threshold,
           is_fallback: true,
           route: "OUT_OF_SCOPE",
           suggested_questions: [
-            "How do I reset my account password?",
-            "What is your refund policy?",
-            "What payment methods are accepted?"
+            "How can I track the live delivery status of my physical shipment?",
+            "What are your standard and expedited shipping delivery estimates?",
+            "What steps should I take if my shipment arrives damaged or missing items?"
           ]
         });
       }
@@ -181,9 +208,9 @@ export async function POST(req: NextRequest) {
         route: "FAQ_SEARCH",
         rewritten_query: rewrittenQuery !== userQuery ? rewrittenQuery : null,
         suggested_questions: suggestions.length > 0 ? suggestions : [
-          "How do I reset my account password?",
-          "What is your refund policy?",
-          "What payment methods are accepted?"
+          "How can I track the live delivery status of my physical shipment?",
+          "What are your standard and expedited shipping delivery estimates?",
+          "Can I edit the destination address after placing an order?"
         ]
       });
     }
