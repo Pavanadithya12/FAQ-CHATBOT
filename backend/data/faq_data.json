@@ -1,352 +1,452 @@
 [
   {
     "id": "faq-001",
-    "category": "Getting Started",
-    "question": "What is this platform and how does it work?",
-    "answer": "Our platform is an all-in-one digital productivity and collaboration service designed to streamline workflows, manage projects, and communicate seamlessly across distributed teams. You can get started by creating a free account, creating a workspace, and inviting your colleagues.",
-    "keywords": ["platform", "what is this", "how it works", "overview", "introduction"]
+    "category": "Account Setup & Authentication",
+    "question": "How do I register a new account on the platform?",
+    "answer": "To create a new account, click the 'Sign Up' button in the upper-right corner of the website. You can sign up using your corporate Google/Microsoft account or by entering your work email address and creating a strong password. A verification link will be sent to your inbox to activate your profile.",
+    "keywords": ["register", "sign up", "create account", "new user", "onboarding"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-002",
-    "category": "Getting Started",
-    "question": "How do I create a new account?",
-    "answer": "Click the 'Sign Up' button on the top right corner of the homepage. You can register using your Google or Microsoft work account, or sign up with an email address and a secure password. Verify your email to activate your account.",
-    "keywords": ["create account", "sign up", "register", "new user", "join"]
+    "category": "Account Setup & Authentication",
+    "question": "How can I reset my forgotten password?",
+    "answer": "On the login screen, click 'Forgot Password?'. Enter your registered email address, and we will send a password reset token valid for 30 minutes. Follow the email link to choose a new password with at least 8 characters including letters, numbers, and symbols.",
+    "keywords": ["forgot password", "reset password", "change password", "login help", "credentials"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-003",
-    "category": "Getting Started",
-    "question": "Is there a free trial available?",
-    "answer": "Yes, we offer a 14-day free trial on our Pro plan with full access to all premium features. No credit card is required to begin your trial period.",
-    "keywords": ["free trial", "try free", "trial period", "no credit card", "14 days"]
+    "category": "Account Setup & Authentication",
+    "question": "How do I configure Two-Factor Authentication (2FA)?",
+    "answer": "Go to User Settings > Security > Two-Factor Authentication. Click 'Enable 2FA', scan the barcode using an authenticator app (Google Authenticator, Microsoft Authenticator, or 1Password), and enter the 6-digit confirmation code to secure your login.",
+    "keywords": ["2fa", "two-factor authentication", "mfa", "authenticator app", "security code"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-004",
-    "category": "Getting Started",
-    "question": "What are the system requirements to use the platform?",
-    "answer": "Our web application works on modern desktop and mobile browsers including Google Chrome, Mozilla Firefox, Apple Safari, and Microsoft Edge. For mobile devices, native apps are available for iOS (version 15+) and Android (version 10+).",
-    "keywords": ["system requirements", "browsers", "compatibility", "devices", "mobile app"]
+    "category": "Account Setup & Authentication",
+    "question": "Why is my account locked and how do I unlock it?",
+    "answer": "For security, accounts are temporarily locked for 30 minutes after 5 consecutive failed login attempts. You can wait for the cooldown timer or click 'Unlock Account' in the security alert email sent to your inbox.",
+    "keywords": ["account locked", "failed attempts", "suspended account", "unlock profile"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-005",
-    "category": "Getting Started",
-    "question": "How do I invite team members to my workspace?",
-    "answer": "Go to Workspace Settings > Members > Invite Members. Enter your colleagues' email addresses, choose their permission level (Admin, Member, or Guest), and click 'Send Invites'.",
-    "keywords": ["invite team", "add members", "collaborators", "workspace", "share"]
+    "category": "Account Setup & Authentication",
+    "question": "Can I link my account to Google or GitHub SSO?",
+    "answer": "Yes. Navigate to Settings > Connected Accounts. You can link your Google, GitHub, or Apple ID to enable one-click Single Sign-On (SSO) for faster and safer logins.",
+    "keywords": ["sso", "single sign-on", "google login", "github login", "connected accounts"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-006",
-    "category": "Account & Security",
-    "question": "How do I reset my account password?",
-    "answer": "Click 'Forgot Password' on the login page, enter your registered email address, and click submit. You will receive an email with a secure reset link valid for 60 minutes. Click the link and enter your new password.",
-    "keywords": ["reset password", "forgot password", "change password", "login credentials"]
+    "category": "Account Setup & Authentication",
+    "question": "How do I update my primary email address or username?",
+    "answer": "Visit Account Settings > Profile Info. Enter your updated email or display name and confirm with your current password. A confirmation email will be sent to the new address to finalize verification.",
+    "keywords": ["change email", "update username", "edit profile", "account details"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-007",
-    "category": "Account & Security",
-    "question": "How do I enable two-factor authentication (2FA)?",
-    "answer": "Navigate to Settings > Security > Two-Factor Authentication. Toggle 'Enable 2FA', scan the QR code with an authenticator app (such as Google Authenticator, 1Password, or Authy), and enter the 6-digit confirmation code.",
-    "keywords": ["2fa", "two-factor", "multi-factor", "authenticator", "security", "mfa"]
+    "category": "Subscriptions, Invoices & Upgrades",
+    "question": "What subscription plans are available?",
+    "answer": "We offer Starter ($9/month per user), Professional ($29/month per user with AI features and priority support), and Enterprise (custom pricing with dedicated account manager, SLA, and custom vector limits).",
+    "keywords": ["pricing plans", "subscription tiers", "starter plan", "pro plan", "enterprise"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-008",
-    "category": "Account & Security",
-    "question": "Can I change my registered email address?",
-    "answer": "Yes. Go to Account Settings > Profile > Email. Enter your new email address and current password. A verification link will be sent to your new email address to confirm the update.",
-    "keywords": ["change email", "update email", "new email", "account profile"]
+    "category": "Subscriptions, Invoices & Upgrades",
+    "question": "How do I upgrade or downgrade my existing plan?",
+    "answer": "Go to Billing > Plans & Usage. Select 'Upgrade' or 'Downgrade' on your desired tier. Upgrades apply immediately with prorated billing. Downgrades take effect at the conclusion of your current billing cycle.",
+    "keywords": ["upgrade tier", "downgrade tier", "change plan", "switch subscription"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-009",
-    "category": "Account & Security",
-    "question": "How do I permanently delete my account?",
-    "answer": "Go to Account Settings > Privacy > Delete Account. Please note that deleting your account is irreversible and permanently removes your profile, files, projects, and personal data.",
-    "keywords": ["delete account", "remove profile", "close account", "cancel account"]
+    "category": "Subscriptions, Invoices & Upgrades",
+    "question": "Where can I download my monthly tax invoices and receipts?",
+    "answer": "You can view and download all past VAT/GST-compliant PDF invoices under Settings > Billing > Invoices. Each record includes billing dates, itemized breakdowns, and transaction IDs.",
+    "keywords": ["download invoice", "tax receipt", "vat receipt", "billing statement", "pdf invoice"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-010",
-    "category": "Account & Security",
-    "question": "Why is my account locked or disabled?",
-    "answer": "Accounts are locked automatically after 5 consecutive failed login attempts to protect against unauthorized access. Check your email for an account unlock link or wait 30 minutes for the lockout to expire.",
-    "keywords": ["locked account", "disabled account", "failed login", "unlock"]
+    "category": "Subscriptions, Invoices & Upgrades",
+    "question": "How do I cancel my active subscription?",
+    "answer": "Go to Billing > Subscription Management and click 'Cancel Subscription'. Follow the cancellation survey. You will maintain access to all paid features until the expiration of your prepaid period.",
+    "keywords": ["cancel subscription", "stop billing", "terminate plan", "unsubscribe"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-011",
-    "category": "Account & Security",
-    "question": "Where can I view active sessions and logged-in devices?",
-    "answer": "Under Settings > Security > Active Sessions, you can view all devices, locations, and browsers currently logged into your account, and click 'Sign Out All Other Devices' if needed.",
-    "keywords": ["active sessions", "login devices", "security check", "sign out all"]
+    "category": "Subscriptions, Invoices & Upgrades",
+    "question": "Do you offer annual discounts or education pricing?",
+    "answer": "Yes! Annual billing plans include an automatic 20% discount. We also offer a 50% discount for accredited educational institutions, non-profit organizations, and student developers.",
+    "keywords": ["annual discount", "yearly plan", "student discount", "non-profit pricing", "education promo"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-012",
-    "category": "Account & Security",
-    "question": "Does the platform support Single Sign-On (SSO)?",
-    "answer": "Yes, Single Sign-On (SSO) using SAML 2.0 and OIDC (including Okta, Microsoft Entra ID, and Google Workspace) is supported on the Enterprise plan.",
-    "keywords": ["sso", "single sign-on", "saml", "okta", "azure ad"]
+    "category": "Subscriptions, Invoices & Upgrades",
+    "question": "What happens when my free trial period ends?",
+    "answer": "At the end of your 14-day free trial, your workspace will transition to the Free Tier unless you select a paid plan. Your data, projects, and settings will remain completely intact and safe.",
+    "keywords": ["trial expiration", "free trial end", "trial converted", "grace period"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-013",
-    "category": "Account & Security",
-    "question": "How do I update my profile name and photo?",
-    "answer": "Go to Settings > Profile. Here you can upload a profile picture (PNG or JPG under 5MB), update your display name, job title, and time zone, then click 'Save Changes'.",
-    "keywords": ["profile picture", "change name", "display photo", "avatar", "user profile"]
+    "category": "Payment Gateways, Cards & Currencies",
+    "question": "What payment methods and currencies do you support?",
+    "answer": "We accept Visa, MasterCard, American Express, PayPal, Apple Pay, Google Pay, and SEPA/ACH direct bank transfers. We support over 25 major currencies including USD, EUR, GBP, CAD, AUD, and INR.",
+    "keywords": ["payment methods", "credit cards", "paypal", "currencies", "apple pay", "wire transfer"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-014",
-    "category": "Account & Security",
-    "question": "What should I do if I suspect my account was compromised?",
-    "answer": "Immediately change your password, click 'Sign Out of All Sessions' in Security settings, enable Two-Factor Authentication, and contact our security team at security@example.com.",
-    "keywords": ["compromised", "hacked", "unauthorized access", "security breach"]
+    "category": "Payment Gateways, Cards & Currencies",
+    "question": "How do I update or replace my credit card details?",
+    "answer": "Navigate to Settings > Billing > Payment Methods. Click 'Add Card' or 'Edit' to update your card number, expiration date, and billing address.",
+    "keywords": ["update card", "change credit card", "expired card", "billing method"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-015",
-    "category": "Billing & Subscriptions",
-    "question": "What pricing plans do you offer?",
-    "answer": "We offer three plans: Free (essential features for up to 3 members), Pro ($12/user/month for growing teams with advanced analytics), and Enterprise (custom pricing for high-scale organizations with dedicated support).",
-    "keywords": ["pricing plans", "subscription cost", "free tier", "pro plan", "enterprise"]
+    "category": "Payment Gateways, Cards & Currencies",
+    "question": "What should I do if my payment fails during checkout?",
+    "answer": "First verify that your card has international transactions enabled and sufficient funds. If the issue persists, contact your bank or try an alternative payment method like PayPal.",
+    "keywords": ["payment declined", "failed transaction", "checkout error", "card error"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-016",
-    "category": "Billing & Subscriptions",
-    "question": "What payment methods are accepted?",
-    "answer": "We accept all major credit and debit cards (Visa, MasterCard, American Express, Discover), PayPal, Apple Pay, Google Pay, and bank wire transfers for annual Enterprise accounts.",
-    "keywords": ["payment methods", "credit cards", "paypal", "apple pay", "wire transfer"]
+    "category": "Payment Gateways, Cards & Currencies",
+    "question": "Is local sales tax or VAT included in the prices?",
+    "answer": "Displayed prices are net of local sales taxes. Applicable taxes (VAT, GST, or state sales tax) are calculated and shown at checkout based on your country and billing address.",
+    "keywords": ["vat", "gst", "sales tax", "tax calculation", "net price"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-017",
-    "category": "Billing & Subscriptions",
-    "question": "How do I upgrade or downgrade my subscription?",
-    "answer": "Navigate to Billing > Plans. Select your new plan tier. Upgrades take effect immediately with prorated charges, while downgrades take effect at the conclusion of your current billing cycle.",
-    "keywords": ["upgrade plan", "downgrade plan", "change tier", "switch plan"]
+    "category": "Payment Gateways, Cards & Currencies",
+    "question": "Can I get an invoice billed directly to my company entity?",
+    "answer": "Yes. In your Billing settings, fill out the 'Company Legal Name' and 'Tax / VAT Identification Number' fields. These details will be automatically included on all future invoices.",
+    "keywords": ["corporate invoice", "company billing", "tax id", "vat number", "business invoice"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-018",
-    "category": "Billing & Subscriptions",
-    "question": "Where can I download past invoices and receipts?",
-    "answer": "You can find and download VAT/GST compliant PDF invoices by visiting Settings > Billing > Invoice History. Click 'Download PDF' next to any billing period.",
-    "keywords": ["invoices", "receipts", "billing history", "tax invoice", "download pdf"]
+    "category": "Returns, Cancellations & Refund Eligibility",
+    "question": "What is the standard refund policy?",
+    "answer": "We offer an unconditional 30-day money-back guarantee for all new software subscriptions and licenses. If you are not satisfied, contact support within 30 days of purchase for a full refund.",
+    "keywords": ["refund policy", "money back guarantee", "request refund", "30 days refund"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-019",
-    "category": "Billing & Subscriptions",
-    "question": "How do I cancel my paid subscription?",
-    "answer": "Go to Settings > Billing > Manage Subscription and click 'Cancel Subscription'. You will keep full access to your paid features until your current prepaid billing term ends.",
-    "keywords": ["cancel subscription", "cancel plan", "stop billing", "unsubscribe"]
+    "category": "Returns, Cancellations & Refund Eligibility",
+    "question": "How long does it take for a refund to process?",
+    "answer": "Once approved, our system submits the refund immediately. Banks and credit card issuers typically take 3 to 7 business days to credit the balance to your account.",
+    "keywords": ["refund duration", "when do i receive refund", "bank processing", "refund turnaround"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-020",
-    "category": "Billing & Subscriptions",
-    "question": "Do you offer annual billing discounts?",
-    "answer": "Yes! Choosing annual billing gives you a 20% discount compared to paying month-to-month. You can switch to annual billing anytime in your Billing settings.",
-    "keywords": ["annual discount", "yearly billing", "save 20%", "discount"]
+    "category": "Returns, Cancellations & Refund Eligibility",
+    "question": "Can I request a refund for unused API credits or consumed tokens?",
+    "answer": "Unused pre-purchased API credit bundles can be refunded within 14 days of purchase. Once credits or tokens are consumed for queries, they are non-refundable.",
+    "keywords": ["api refund", "token refund", "credit refund", "consumed usage"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-021",
-    "category": "Billing & Subscriptions",
-    "question": "Do you offer non-profit or student discounts?",
-    "answer": "Yes, registered 501(c)(3) non-profit organizations, educational institutions, and verified students are eligible for a 50% discount. Apply via our Education and Non-Profit form.",
-    "keywords": ["student discount", "non-profit", "education", "school", "ngo"]
+    "category": "Returns, Cancellations & Refund Eligibility",
+    "question": "What if I was charged after forgetting to cancel auto-renewal?",
+    "answer": "If you are charged for an unwanted auto-renewal, contact support within 7 business days of the charge without utilizing workspace features, and we will issue a full courtesy refund.",
+    "keywords": ["accidental renewal", "auto-renewal refund", "charged renewal", "cancel auto renew"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-022",
-    "category": "Billing & Subscriptions",
-    "question": "What happens if a subscription renewal payment fails?",
-    "answer": "If a renewal payment fails, our system retries the charge 3 times over 7 days. You will receive email alerts. If payment is not completed after 7 days, the account is temporarily paused.",
-    "keywords": ["failed payment", "card declined", "grace period", "overdue invoice"]
+    "category": "Returns, Cancellations & Refund Eligibility",
+    "question": "How do I return a defective physical hardware device?",
+    "answer": "Submit a return request in the Hardware Portal with your serial number and photos of the defect. We will issue a prepaid return shipping label and ship a replacement within 24 hours.",
+    "keywords": ["hardware return", "defective unit", "rma label", "warranty exchange"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-023",
-    "category": "Billing & Subscriptions",
-    "question": "How do I update my credit card or billing address?",
-    "answer": "Go to Settings > Billing > Payment Methods. Click 'Edit' or 'Add New Card' to enter updated credit card numbers and billing address information.",
-    "keywords": ["update credit card", "change payment method", "billing address"]
+    "category": "API Keys, Webhooks & Developer SDKs",
+    "question": "Where can I find the REST API documentation and endpoints?",
+    "answer": "Complete REST and GraphQL API specifications, authentication guides, and code examples are available at https://docs.example.com/api with an interactive Swagger test sandbox.",
+    "keywords": ["api documentation", "developer docs", "rest api", "endpoints", "swagger"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-024",
-    "category": "Returns & Refunds",
-    "question": "What is your refund policy?",
-    "answer": "We provide a 30-day money-back guarantee for software subscriptions and physical products. If you are not satisfied with your purchase, contact support within 30 days for a full refund.",
-    "keywords": ["refund policy", "money back guarantee", "request refund", "30 days"]
+    "category": "API Keys, Webhooks & Developer SDKs",
+    "question": "How do I generate and manage secret API keys?",
+    "answer": "Go to Developer Console > API Keys. Click 'Create Secret Key', assign custom scopes (Read/Write), and securely save the token. Revoke old keys immediately if compromised.",
+    "keywords": ["api keys", "generate token", "secret key", "developer access", "auth header"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-025",
-    "category": "Returns & Refunds",
-    "question": "How long does a refund take to appear in my account?",
-    "answer": "Once approved, refunds are processed within 3-5 business days. Depending on your bank or credit card provider, it may take an additional 5-10 business days for the funds to reflect on your statement.",
-    "keywords": ["refund timeline", "when do i get refund", "refund status", "bank credit"]
+    "category": "API Keys, Webhooks & Developer SDKs",
+    "question": "What are the standard API rate limits and throttling rules?",
+    "answer": "Standard tier allows 1,200 requests per minute with a burst allowance of 60 requests/second. Enterprise tiers offer custom rate limits and dedicated IP pools with guaranteed uptime SLAs.",
+    "keywords": ["rate limits", "throttling", "429 too many requests", "api quota", "burst limit"],
+    "difficulty": "advanced",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-026",
-    "category": "Returns & Refunds",
-    "question": "Can I get a refund if I forgot to cancel before auto-renewal?",
-    "answer": "Yes. If your annual or monthly subscription renewed automatically and you contact us within 7 days of the renewal charge without using the service, we will grant a full courtesy refund.",
-    "keywords": ["accidental renewal", "auto renew refund", "forgot to cancel", "refund renewal"]
+    "category": "API Keys, Webhooks & Developer SDKs",
+    "question": "How do I set up webhooks for real-time notifications?",
+    "answer": "Go to Developer Console > Webhooks > Add Endpoint. Provide your HTTPS callback URL and select trigger events (e.g. `user.created`, `payment.succeeded`, `ticket.resolved`). Verify signatures using HMAC SHA-256.",
+    "keywords": ["webhooks", "event listeners", "http callbacks", "hmac signature", "payloads"],
+    "difficulty": "advanced",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-027",
-    "category": "Orders & Shipping",
-    "question": "How do I track my order or package shipment?",
-    "answer": "Once your order is shipped, we send an email with the tracking number and a courier tracking link (FedEx, UPS, or DHL). You can also track your package in your account under 'My Orders'.",
-    "keywords": ["track order", "shipping status", "package tracking", "courier", "delivery"]
+    "category": "API Keys, Webhooks & Developer SDKs",
+    "question": "What programming language SDK libraries do you support?",
+    "answer": "We maintain official SDKs for Python (`pip install cloud-sdk`), TypeScript/Node.js (`npm i @cloud/sdk`), Go, and Java. Community-maintained packages for Ruby, PHP, and C# are also available.",
+    "keywords": ["sdk", "python library", "npm package", "golang sdk", "developer tools"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-028",
-    "category": "Orders & Shipping",
-    "question": "What are your standard delivery shipping times?",
-    "answer": "Standard domestic delivery takes 3-5 business days. Express overnight shipping takes 1-2 business days. International deliveries generally take 7-14 business days depending on customs.",
-    "keywords": ["delivery times", "shipping time", "express delivery", "international shipping"]
+    "category": "API Keys, Webhooks & Developer SDKs",
+    "question": "How do I integrate Pinecone Vector Database with your API?",
+    "answer": "Set `PINECONE_API_KEY` and `PINECONE_INDEX_NAME` in your environment settings. Our SDK connects to Pinecone automatically using cosine similarity metrics (384 dimensions for all-MiniLM-L6-v2).",
+    "keywords": ["pinecone", "vector database", "embeddings integration", "vector search", "pinecone index"],
+    "difficulty": "advanced",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-029",
-    "category": "Orders & Shipping",
-    "question": "Can I change my delivery shipping address after placing an order?",
-    "answer": "You can update your shipping address within 1 hour of placing the order from 'My Orders'. After 1 hour, your package enters fulfillment and address changes cannot be guaranteed.",
-    "keywords": ["change address", "update shipping address", "wrong address", "edit order"]
+    "category": "Data Privacy, Encryption & GDPR Compliance",
+    "question": "How is customer data encrypted in transit and at rest?",
+    "answer": "All network traffic is encrypted using TLS 1.3 protocol. Stored data and backups are encrypted at rest using AES-256 encryption with automated key rotation in SOC-2 Type II certified datacenters.",
+    "keywords": ["encryption", "aes-256", "tls 1.3", "data security", "cryptography"],
+    "difficulty": "advanced",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-030",
-    "category": "Orders & Shipping",
-    "question": "Do you offer international shipping worldwide?",
-    "answer": "Yes, we ship to over 120 countries worldwide. Applicable international shipping rates and customs duties are calculated at checkout based on your destination country.",
-    "keywords": ["international shipping", "ship worldwide", "global delivery", "customs duties"]
+    "category": "Data Privacy, Encryption & GDPR Compliance",
+    "question": "Is the service fully compliant with GDPR and CCPA regulations?",
+    "answer": "Yes. We strictly adhere to GDPR, CCPA, and global privacy frameworks. Customers can exercise their Right to Access, Data Portability, and Right to Erasure directly in their privacy dashboard.",
+    "keywords": ["gdpr", "ccpa", "privacy policy", "data compliance", "right to erasure"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-031",
-    "category": "Orders & Shipping",
-    "question": "What should I do if my package is marked delivered but not received?",
-    "answer": "First check around your entrance and with neighbors. If your parcel cannot be found within 24 hours of delivery status, email support@example.com with your order number for a replacement.",
-    "keywords": ["missing package", "marked delivered", "lost package", "package not received"]
+    "category": "Data Privacy, Encryption & GDPR Compliance",
+    "question": "Do you sign Business Associate Agreements (BAA) for HIPAA compliance?",
+    "answer": "Yes. For healthcare organizations on our Enterprise plan, we execute standard Business Associate Agreements (BAA) ensuring strict HIPAA-compliant audit logging and access controls.",
+    "keywords": ["hipaa", "baa", "healthcare compliance", "medical records", "security audit"],
+    "difficulty": "advanced",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-032",
-    "category": "Orders & Shipping",
-    "question": "What should I do if my items arrived damaged or defective?",
-    "answer": "Take photos of the damaged item and packaging within 48 hours of delivery. Email the pictures and order number to support@example.com, and we will issue an immediate free replacement.",
-    "keywords": ["damaged item", "broken package", "defective item", "replacement"]
+    "category": "Data Privacy, Encryption & GDPR Compliance",
+    "question": "How can I export a full backup of my workspace data?",
+    "answer": "Go to Workspace Settings > Data Export. Select your format (JSON, CSV, or SQL dump). We will generate an encrypted archive and email a time-sensitive download link valid for 48 hours.",
+    "keywords": ["export data", "backup workspace", "download json", "data dump", "portability"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-033",
-    "category": "Features & Productivity",
-    "question": "Can I use keyboard shortcuts to navigate faster?",
-    "answer": "Yes! Press 'Cmd + K' on Mac or 'Ctrl + K' on Windows to open the Quick Command Palette. Press '?' anytime to view the full list of keyboard shortcuts.",
-    "keywords": ["keyboard shortcuts", "command palette", "hotkeys", "quick search"]
+    "category": "Data Privacy, Encryption & GDPR Compliance",
+    "question": "How do you handle security vulnerabilities and bug bounty reports?",
+    "answer": "We maintain a responsible disclosure bug bounty program. Security researchers can submit vulnerability findings to security@example.com with reproducible proof-of-concept steps.",
+    "keywords": ["bug bounty", "vulnerability report", "security disclosure", "responsible disclosure"],
+    "difficulty": "advanced",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-034",
-    "category": "Features & Productivity",
-    "question": "Is dark mode theme available in the application?",
-    "answer": "Yes. Click your profile avatar in the upper right corner and toggle theme preferences between 'Light', 'Dark', or 'Sync with System Settings'.",
-    "keywords": ["dark mode", "night theme", "black background", "theme settings"]
+    "category": "Orders, Shipping & Parcel Tracking",
+    "question": "How can I track the live delivery status of my physical shipment?",
+    "answer": "Once dispatched, an automated email containing your tracking code and carrier link (FedEx/DHL/UPS) is sent. You can also view live delivery milestones under 'My Orders' in your account.",
+    "keywords": ["track shipment", "order tracking", "parcel status", "courier tracking", "delivery tracking"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-035",
-    "category": "Features & Productivity",
-    "question": "How do I export my workspace data and files?",
-    "answer": "Go to Settings > Data Management > Export Workspace. You can export all projects, tasks, and chat history in JSON, CSV, or PDF formats. You will receive an email download link.",
-    "keywords": ["export data", "download files", "backup data", "csv export", "json export"]
+    "category": "Orders, Shipping & Parcel Tracking",
+    "question": "What are your standard and expedited shipping delivery estimates?",
+    "answer": "Domestic standard ground shipping takes 3-5 business days. Express overnight shipping arrives in 1-2 business days. International deliveries take 7-14 business days depending on customs.",
+    "keywords": ["shipping times", "delivery estimates", "express delivery", "overnight shipping"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-036",
-    "category": "Features & Productivity",
-    "question": "Can I work offline without an internet connection?",
-    "answer": "Yes, our desktop and mobile apps support offline mode. Any changes you make while offline are stored locally and automatically sync to the cloud once an internet connection is re-established.",
-    "keywords": ["offline mode", "work offline", "sync later", "no internet"]
+    "category": "Orders, Shipping & Parcel Tracking",
+    "question": "Can I edit the destination address after placing an order?",
+    "answer": "You can modify your shipping address within 60 minutes of placing an order from the 'My Orders' tab. After 60 minutes, the package is routed to warehouse fulfillment and cannot be changed.",
+    "keywords": ["change address", "update shipping address", "wrong address", "edit order destination"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-037",
-    "category": "Features & Productivity",
-    "question": "Does the platform integrate with Slack and Microsoft Teams?",
-    "answer": "Yes! We offer official native integrations with Slack, Microsoft Teams, Google Drive, Jira, GitHub, and Zapier. Visit Settings > Integrations to connect your tools.",
-    "keywords": ["slack integration", "microsoft teams", "integrations", "zapier", "github"]
+    "category": "Orders, Shipping & Parcel Tracking",
+    "question": "Do you deliver internationally to all global countries?",
+    "answer": "We deliver to over 130 countries worldwide. Applicable international shipping charges, import taxes, and customs duties are computed transparently at checkout.",
+    "keywords": ["international delivery", "worldwide shipping", "global courier", "customs fees"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-038",
-    "category": "Features & Productivity",
-    "question": "How do file attachments and storage limits work?",
-    "answer": "Free plans include 5 GB of cloud storage. Pro plans include 100 GB of storage per user, and Enterprise plans offer unlimited storage. The maximum single file upload size is 2 GB.",
-    "keywords": ["storage limit", "file size", "upload attachments", "cloud storage"]
+    "category": "Orders, Shipping & Parcel Tracking",
+    "question": "What steps should I take if my shipment arrives damaged or missing items?",
+    "answer": "Take clear photos of the damaged packaging within 48 hours of delivery and email support@example.com with your order number. We will dispatch an immediate free replacement.",
+    "keywords": ["damaged shipment", "broken goods", "missing parcel", "replacement item"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-039",
-    "category": "Features & Productivity",
-    "question": "How do I set up notification preferences?",
-    "answer": "Visit Settings > Notifications. You can customize email notifications, desktop browser popups, and mobile push alerts for mentions, replies, and task assignments.",
-    "keywords": ["notifications", "email alerts", "push notifications", "mute notifications"]
+    "category": "Collaboration, Workspaces & Permissions",
+    "question": "How do I create and manage multiple workspaces?",
+    "answer": "Click your workspace name in the top sidebar and select 'Create New Workspace'. You can switch between different company environments and manage billing separately for each.",
+    "keywords": ["create workspace", "multiple workspaces", "switch team", "workspace switcher"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-040",
-    "category": "Technical & Developer",
-    "question": "Where can I find the REST API documentation?",
-    "answer": "Complete developer documentation, code samples, and OpenAPI schemas are available at https://docs.example.com/api. Standard API rate limits are 1,000 requests per minute.",
-    "keywords": ["api documentation", "rest api", "developer docs", "endpoints", "rate limits"]
+    "category": "Collaboration, Workspaces & Permissions",
+    "question": "What user roles and permission levels are supported?",
+    "answer": "We support 4 granular permission roles: Owner (full administrative & billing control), Admin (manages members and integrations), Member (creates and edits content), and Guest (read-only access).",
+    "keywords": ["user roles", "permissions", "admin role", "guest access", "access control"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-041",
-    "category": "Technical & Developer",
-    "question": "How do I generate and manage API keys?",
-    "answer": "Go to Settings > Developer > API Keys. Click 'Generate New API Key', name your token, and save the secret key securely. You can revoke tokens anytime.",
-    "keywords": ["api keys", "generate token", "developer keys", "secret token", "api access"]
+    "category": "Collaboration, Workspaces & Permissions",
+    "question": "Can I invite external clients as free read-only guest collaborators?",
+    "answer": "Yes! On Pro and Enterprise plans, you can invite unlimited read-only guest reviewers to view shared documents and dashboards without consuming paid team seats.",
+    "keywords": ["guest collaborator", "external client", "read-only access", "free seats"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-042",
-    "category": "Technical & Developer",
-    "question": "Are webhooks supported for real-time events?",
-    "answer": "Yes, we support HTTPS webhooks for events like user creation, payment success, order updates, and message posts. Configure webhook URLs under Settings > Developer > Webhooks.",
-    "keywords": ["webhooks", "event listeners", "http callbacks", "real-time events"]
+    "category": "Collaboration, Workspaces & Permissions",
+    "question": "Does the system integrate with Slack, Microsoft Teams, and Jira?",
+    "answer": "Yes! We offer official native integrations with Slack, Microsoft Teams, Jira, GitHub, Notion, and Zapier. Enable them under Workspace Settings > Integrations.",
+    "keywords": ["slack integration", "teams integration", "jira", "github app", "third party apps"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-043",
-    "category": "Technical & Developer",
-    "question": "What SDKs and programming languages are officially supported?",
-    "answer": "We maintain official SDKs for Python (`pip install example-sdk`), Node.js/TypeScript (`npm install @example/sdk`), Go, and Java, plus community SDKs for PHP and Ruby.",
-    "keywords": ["sdks", "python library", "nodejs client", "typescript sdk", "developer tools"]
+    "category": "Collaboration, Workspaces & Permissions",
+    "question": "Can multiple teammates edit the same document concurrently in real time?",
+    "answer": "Yes. Our real-time collaborative editor uses Operational Transformation (OT) and CRDT protocols to display live presence cursors and synchronize edits instantaneously without conflicts.",
+    "keywords": ["real-time collaboration", "live editing", "multiplayer editor", "concurrent editing"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-044",
-    "category": "Technical & Developer",
-    "question": "Where can I check system uptime and server status?",
-    "answer": "Live platform uptime, scheduled maintenance, and incident history are publicly monitored 24/7 at https://status.example.com.",
-    "keywords": ["system status", "uptime", "server downtime", "incident report", "maintenance"]
+    "category": "Collaboration, Workspaces & Permissions",
+    "question": "How do file attachment uploads and storage limits work?",
+    "answer": "Free plans include 5 GB of shared cloud storage. Pro plans provide 100 GB per seat, and Enterprise plans offer unlimited storage with maximum individual file upload size of 5 GB.",
+    "keywords": ["storage quota", "file upload limit", "attachment size", "cloud storage"],
+    "difficulty": "intermediate",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-045",
-    "category": "Security & Compliance",
-    "question": "How is customer data encrypted and protected?",
-    "answer": "All data in transit is encrypted with TLS 1.3, and data at rest is secured using AES-256 encryption. Our infrastructure is hosted in ISO 27001 and SOC 2 Type II certified data centers.",
-    "keywords": ["encryption", "security", "tls 1.3", "aes-256", "data protection"]
+    "category": "Troubleshooting & Customer Support Escalation",
+    "question": "How do I contact human customer support?",
+    "answer": "You can reach our human support team 24/7 via the live chat bubble at the bottom right corner of the app, or by emailing support@example.com. Enterprise customers have dedicated phone support.",
+    "keywords": ["contact support", "human agent", "talk to support", "help desk", "email support"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-046",
-    "category": "Security & Compliance",
-    "question": "Is the platform GDPR and CCPA compliant?",
-    "answer": "Yes, we are fully compliant with GDPR, CCPA, and global privacy standards. Users have full rights to access, export, or delete their personal data at any time.",
-    "keywords": ["gdpr", "ccpa", "privacy compliance", "data privacy", "compliance"]
+    "category": "Troubleshooting & Customer Support Escalation",
+    "question": "What are your standard support operating hours and SLA response times?",
+    "answer": "Live chat and email support operate 24/7/365. Standard tickets receive initial responses within 2 hours. Enterprise critical incidents are backed by a 15-minute SLA response guarantee.",
+    "keywords": ["support hours", "sla response time", "response guarantee", "24/7 availability"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-047",
-    "category": "Security & Compliance",
-    "question": "Do you support HIPAA compliance and sign Business Associate Agreements (BAA)?",
-    "answer": "Yes, HIPAA compliance and signed Business Associate Agreements (BAA) are available for healthcare customers on the Enterprise tier.",
-    "keywords": ["hipaa", "baa", "healthcare compliance", "medical data"]
+    "category": "Troubleshooting & Customer Support Escalation",
+    "question": "Where can I monitor real-time server uptime and incident status?",
+    "answer": "You can check real-time system health, scheduled maintenance windows, and historical uptime 24/7 on our public status page at https://status.example.com.",
+    "keywords": ["system status", "server uptime", "incident reports", "outage check", "downtime"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-048",
-    "category": "Customer Support",
-    "question": "How can I contact human customer support?",
-    "answer": "You can reach our customer support team 24/7 via the live chat widget at the bottom right corner of the dashboard, or by emailing support@example.com. Enterprise plans also include dedicated phone support.",
-    "keywords": ["contact support", "talk to human", "customer care", "help desk", "email support"]
+    "category": "Troubleshooting & Customer Support Escalation",
+    "question": "How do I enable Dark Mode theme in the web application?",
+    "answer": "Click your avatar in the upper-right corner and select Theme > Dark Mode. You can also toggle 'Sync with System' to automatically match your operating system theme.",
+    "keywords": ["dark mode", "night theme", "theme settings", "appearance", "dark theme"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-049",
-    "category": "Customer Support",
-    "question": "What are your customer support working hours?",
-    "answer": "Live chat and email support are available 24/7, 365 days a year. Dedicated phone support for Enterprise clients is available Monday through Friday, 8:00 AM to 8:00 PM EST.",
-    "keywords": ["support hours", "working hours", "24/7 support", "availability"]
+    "category": "Troubleshooting & Customer Support Escalation",
+    "question": "How do I submit product feature requests or feedback to the engineering team?",
+    "answer": "We love customer input! You can submit feature requests, view upcoming roadmaps, and upvote community ideas on our public feedback board at https://feedback.example.com.",
+    "keywords": ["feature request", "feedback portal", "roadmap", "suggest improvement", "ideas"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   },
   {
     "id": "faq-050",
-    "category": "Customer Support",
-    "question": "Where can I suggest new features or submit product feedback?",
-    "answer": "We welcome customer suggestions! You can share your ideas and upvote upcoming features on our public feedback board at https://feedback.example.com or post in our community forum.",
-    "keywords": ["suggest feature", "feedback", "roadmap", "product ideas", "community"]
+    "category": "Troubleshooting & Customer Support Escalation",
+    "question": "What keyboard shortcuts are available to speed up navigation?",
+    "answer": "Press 'Cmd + K' (Mac) or 'Ctrl + K' (Windows) to trigger the Quick Command Bar. Press '?' at any time to open the full interactive shortcut overlay cheat sheet.",
+    "keywords": ["keyboard shortcuts", "command palette", "hotkeys", "quick navigation", "cmd k"],
+    "difficulty": "beginner",
+    "last_updated": "2026-09-01"
   }
 ]

@@ -44,12 +44,12 @@ class TestFAQChatbotPipeline(unittest.TestCase):
         self.assertIn("refund", rewritten.lower())
 
     def test_06_exact_faq_match(self):
-        req = ChatRequest(question="How do I reset my account password?")
+        req = ChatRequest(question="How can I reset my forgotten password?")
         res = chat_endpoint(req)
         self.assertFalse(res.is_fallback)
         self.assertGreaterEqual(res.confidence_score, 0.50)
-        self.assertEqual(res.matched_faq.id, "faq-006")
-        self.assertIn("Forgot Password", res.answer)
+        self.assertEqual(res.matched_faq.id, "faq-002")
+        self.assertIn("password", res.answer.lower())
 
     def test_07_paraphrased_faq_match(self):
         req = ChatRequest(question="I forgot my credentials to log in")

@@ -6,14 +6,15 @@ logger = logging.getLogger(__name__)
 
 class QueryRewriter:
     VAGUE_MAPPINGS = {
-        r"\b(money back|cash back|want my money|give refund)\b": "how to request a refund and refund policy",
-        r"\b(forgot pass|lost password|cant login|change pass|forgot.*credentials|lost.*credentials|login credentials)\b": "how do I reset my account password",
-        r"\b(where is my stuff|package status|track parcel|delivery status)\b": "how to track my shipment or order status",
-        r"\b(pay methods|how to pay|cards accepted)\b": "what payment methods do you accept",
-        r"\b(stop plan|stop subscription|cancel membership)\b": "how to cancel my subscription",
-        r"\b(broken item|damaged package|broken goods)\b": "what should I do if I received damaged items",
-        r"\b(dark mode|night theme|black background)\b": "is dark mode available in the application",
-        r"\b(talk to person|human support|reach agent|customer care)\b": "how do I contact customer support"
+        r"\b(money back|cash back|want my money|give refund|refund policy)\b": "What is the standard refund policy?",
+        r"\b(forgot pass|lost password|cant login|change pass|forgot.*credentials|lost.*credentials|login credentials|reset.*password)\b": "How can I reset my forgotten password?",
+        r"\b(where is my stuff|package status|track parcel|delivery status|track order|shipping status)\b": "How can I track the live delivery status of my physical shipment?",
+        r"\b(pay methods|how to pay|cards accepted|payment options)\b": "What payment methods and currencies do you support?",
+        r"\b(stop plan|stop subscription|cancel membership|cancel plan)\b": "How do I cancel my active subscription?",
+        r"\b(broken item|damaged package|broken goods|defective product)\b": "What steps should I take if my shipment arrives damaged or missing items?",
+        r"\b(dark mode|night theme|black background)\b": "How do I enable Dark Mode theme in the web application?",
+        r"\b(talk to person|human support|reach agent|customer care|call support)\b": "How do I contact human customer support?",
+        r"\b(create account|sign up|new registration|how to join)\b": "How do I register a new account on the platform?"
     }
 
     CONVERSATIONAL_PREFIXES = [
