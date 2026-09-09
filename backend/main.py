@@ -14,6 +14,7 @@ from services.answer_selector import answer_selector
 from services.response_writer import response_writer
 from services.fallback import fallback_handler
 from services.pinecone_service import pinecone_service
+from services.db_service import db_service
 import ingest
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -86,6 +87,10 @@ def trigger_ingest():
         return {"status": "success", "message": "All FAQs successfully re-indexed into vector database."}
     raise HTTPException(status_code=500, detail="Ingestion failed.")
 
+@app.get("/api/history")
+def get_chat_history(limit: int = 50):
+    return db_service.get_recent_logs(limit=limit)
+
 @app.post("/api/chat", response_model=ChatResponse)
 def chat_endpoint(request: ChatRequest):
     """
@@ -151,6 +156,15 @@ def chat_endpoint(request: ChatRequest):
     if not selection["is_confident"] or selection["selected_faq"] is None:
         # Step 9: Fallback Handler
         fb = fallback_handler.get_fallback_response(reason="LOW_CONFIDENCE", top_candidates=matches)
+        db_service.log_interaction(
+            user_query=user_query,
+            rewritten_query=rewritten_query if rewritten_query != user_query else None,
+            route=route,
+            bot_response=fb["answer"],
+            confidence_score=selection["confidence_score"],
+            threshold=selection["threshold"],
+            is_fallback=True
+        )
         return ChatResponse(
             answer=fb["answer"],
             confidence_score=selection["confidence_score"],
@@ -166,6 +180,18 @@ def chat_endpoint(request: ChatRequest):
     metadata = selected_faq["metadata"]
     final_answer = response_writer.write_response(user_query, selected_faq)
 
+    faq_id = metadata.get("id", selected_faq.get("id", ""))
+    db_service.log_interaction(
+        user_query=user_query,
+        rewritten_query=rewritten_query if rewritten_query != user_query else None,
+        route=route,
+        bot_response=final_answer,
+        confidence_score=selection["confidence_score"],
+        threshold=selection["threshold"],
+        is_fallback=False,
+        matched_faq_id=faq_id
+    )
+
     return ChatResponse(
         answer=final_answer,
         confidence_score=selection["confidence_score"],
@@ -174,7 +200,7 @@ def chat_endpoint(request: ChatRequest):
         route=route,
         rewritten_query=rewritten_query if rewritten_query != user_query else None,
         matched_faq=MatchedFAQ(
-            id=metadata.get("id", selected_faq.get("id", "")),
+            id=faq_id,
             question=metadata.get("question", ""),
             category=metadata.get("category", "General"),
             answer=metadata.get("answer", "")

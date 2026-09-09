@@ -5,7 +5,7 @@ echo =======================================================
 echo.
 
 echo [1/2] Starting Python FastAPI Backend on http://localhost:8000 ...
-start "FAQ Chatbot Backend (FastAPI)" cmd /k "cd backend && python main.py"
+start "FAQ Chatbot Backend (FastAPI)" cmd /k "cd backend && (if exist venv\Scripts\python.exe (venv\Scripts\python main.py) else (python main.py))"
 
 timeout /t 3 /nobreak >nul
 
