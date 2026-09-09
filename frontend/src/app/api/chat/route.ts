@@ -234,9 +234,10 @@ export async function POST(req: NextRequest) {
       },
       suggested_questions: topCandidates.slice(1).map(c => c.faq.question)
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: "Internal server error", details: err?.message || String(err) },
+      { error: "Internal server error", details: errorMsg },
       { status: 500 }
     );
   }

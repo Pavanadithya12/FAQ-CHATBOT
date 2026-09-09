@@ -6,13 +6,11 @@ import {
   Bot, 
   User, 
   Sparkles, 
-  HelpCircle, 
   RotateCcw, 
   Sliders, 
   CheckCircle2, 
   AlertCircle,
   Database,
-  ExternalLink,
   ChevronDown,
   ChevronUp
 } from "lucide-react";
@@ -43,13 +41,13 @@ export default function FAQChatbot() {
     {
       id: "welcome",
       sender: "bot",
-      text: "👋 Hello! I am your AI-powered FAQ Assistant. I search through verified documentation using Pinecone vector semantic search to give you accurate, grounded answers.\n\nAsk me anything about account security, billing, shipping, or refunds!",
+      text: "👋 Hello! I am your AI-powered FAQ Assistant. I search through verified documentation using Pinecone vector semantic search to give you accurate, grounded answers.\n\nAsk me anything about account setup, billing, orders, shipping tracking, or refunds!",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       suggested_questions: [
-        "How do I reset my account password?",
-        "What is your refund policy?",
-        "What payment methods do you accept?",
-        "How can I track my shipment or order status?"
+        "How do I register a new account on the platform?",
+        "How can I reset my forgotten password?",
+        "What is the standard refund policy?",
+        "How can I track the live delivery status of my physical shipment?"
       ]
     }
   ]);
@@ -75,7 +73,8 @@ export default function FAQChatbot() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const res = await fetch(`${apiUrl}/api/health`, { method: "GET" });
+        const endpoint = apiUrl ? `${apiUrl}/api/health` : "/api/health";
+        const res = await fetch(endpoint, { method: "GET" });
         if (res.ok) {
           setBackendStatus("connected");
         } else {
@@ -111,7 +110,8 @@ export default function FAQChatbot() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${apiUrl}/api/chat`, {
+      const endpoint = apiUrl ? `${apiUrl}/api/chat` : "/api/chat";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -141,11 +141,11 @@ export default function FAQChatbot() {
       };
 
       setMessages(prev => [...prev, botMessage]);
-    } catch (err) {
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         sender: "bot",
-        text: "⚠️ Could not connect to the Backend API server at " + apiUrl + ". Please ensure your FastAPI backend is running via `python main.py` on port 8000.",
+        text: "⚠️ Could not connect to the API server. Please ensure the backend is running or deploy to Vercel/Render.",
         is_fallback: true,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -163,10 +163,10 @@ export default function FAQChatbot() {
         text: "Conversation cleared. How can I help you with our product and services today?",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         suggested_questions: [
-          "How do I reset my account password?",
-          "What is your refund policy?",
-          "Can I change my registered email address?",
-          "How do I contact customer support?"
+          "How do I register a new account on the platform?",
+          "How can I reset my forgotten password?",
+          "What is the standard refund policy?",
+          "How can I track the live delivery status of my physical shipment?"
         ]
       }
     ]);
@@ -192,7 +192,7 @@ export default function FAQChatbot() {
               <span>•</span>
               <span className="flex items-center gap-1">
                 <span className={`w-2 h-2 rounded-full ${backendStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-                {backendStatus === 'connected' ? 'FastAPI Online' : 'Backend Offline'}
+                {backendStatus === 'connected' ? 'Engine Online' : 'Engine Offline'}
               </span>
             </div>
           </div>
@@ -242,21 +242,21 @@ export default function FAQChatbot() {
               />
               <div className="flex justify-between text-[10px] text-slate-400 mt-1">
                 <span>0.30 (Permissive)</span>
-                <span>0.65 (Recommended)</span>
+                <span>0.50 (Recommended)</span>
                 <span>0.95 (Strict)</span>
               </div>
             </div>
 
             <div className="sm:w-72">
               <label className="text-xs font-semibold text-slate-700 block mb-1">
-                Backend API Endpoint
+                Backend API Endpoint (Optional Override)
               </label>
               <input
                 type="text"
                 value={apiUrl}
                 onChange={(e) => setApiUrl(e.target.value)}
                 className="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-sky-500"
-                placeholder="http://localhost:8000"
+                placeholder="Leave blank for cloud route"
               />
             </div>
           </div>
@@ -303,12 +303,12 @@ export default function FAQChatbot() {
                   {msg.confidence_score !== undefined && (
                     <span
                       className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border ${
-                        msg.confidence_score >= (msg.threshold || 0.65)
+                        msg.confidence_score >= (msg.threshold || 0.50)
                           ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                           : "bg-amber-50 text-amber-700 border-amber-200"
                       }`}
                     >
-                      {msg.confidence_score >= (msg.threshold || 0.65) ? (
+                      {msg.confidence_score >= (msg.threshold || 0.50) ? (
                         <CheckCircle2 className="w-3 h-3" />
                       ) : (
                         <AlertCircle className="w-3 h-3" />
@@ -371,7 +371,7 @@ export default function FAQChatbot() {
                       <button
                         key={idx}
                         onClick={() => handleSendMessage(suggestion)}
-                        className="text-xs bg-white hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 transition text-slate-700 border border-slate-200 px-3 py-1.5 rounded-full text-left shadow-2xs"
+                        className="text-xs bg-white hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 transition text-slate-700 border border-slate-200 px-3 py-1.5 rounded-full text-left shadow-sm"
                       >
                         {suggestion}
                       </button>
@@ -386,7 +386,7 @@ export default function FAQChatbot() {
             </div>
 
             {msg.sender === "user" && (
-              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-white shrink-0 mt-0.5 shadow-xs">
+              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-white shrink-0 mt-0.5 shadow-sm">
                 <User className="w-4 h-4" />
               </div>
             )}
@@ -398,7 +398,7 @@ export default function FAQChatbot() {
             <div className="w-8 h-8 rounded-lg bg-sky-100 border border-sky-200 flex items-center justify-center text-sky-700 shrink-0">
               <Bot className="w-4 h-4" />
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-500 flex items-center gap-2 shadow-xs">
+            <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-500 flex items-center gap-2 shadow-sm">
               <div className="flex gap-1">
                 <span className="w-2 h-2 rounded-full bg-sky-500 animate-bounce" style={{ animationDelay: '0ms' }}></span>
                 <span className="w-2 h-2 rounded-full bg-sky-500 animate-bounce" style={{ animationDelay: '150ms' }}></span>
