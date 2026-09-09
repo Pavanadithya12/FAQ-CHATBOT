@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 class QueryRewriter:
     VAGUE_MAPPINGS = {
         r"\b(money back|cash back|want my money|give refund)\b": "how to request a refund and refund policy",
-        r"\b(forgot pass|lost password|cant login|change pass)\b": "how to reset my account password",
+        r"\b(forgot pass|lost password|cant login|change pass|forgot.*credentials|lost.*credentials|login credentials)\b": "how do I reset my account password",
         r"\b(where is my stuff|package status|track parcel|delivery status)\b": "how to track my shipment or order status",
         r"\b(pay methods|how to pay|cards accepted)\b": "what payment methods do you accept",
         r"\b(stop plan|stop subscription|cancel membership)\b": "how to cancel my subscription",
