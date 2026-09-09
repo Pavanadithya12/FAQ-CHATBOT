@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: faq-chatbot-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: SIMILARITY_THRESHOLD
+        value: 0.50
+      - key: EMBEDDING_MODEL
+        value: all-MiniLM-L6-v2
