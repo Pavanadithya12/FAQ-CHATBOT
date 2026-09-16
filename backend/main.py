@@ -1,4 +1,4 @@
-﻿import os
+import os
 import json
 import logging
 from typing import Optional, List, Dict, Any
@@ -133,15 +133,22 @@ def signup(req: SignupRequest):
 def login(req: LoginRequest):
     user = db_service.get_user_by_username(req.username)
     if not user or not auth_service.verify_password(req.password, user["hashed_password"]):
+        db_service.record_login(username=req.username, status="FAILED")
         raise HTTPException(status_code=401, detail="Invalid username or password.")
 
     safe_user = {k: v for k, v in user.items() if k != "hashed_password"}
     token = auth_service.create_access_token({"sub": str(user["id"]), "username": user["username"]})
+    db_service.record_login(username=user["username"], user_id=user["id"], status="SUCCESS")
     return AuthResponse(access_token=token, user=safe_user)
 
 @app.get("/api/auth/me")
 def get_profile(user: Dict[str, Any] = Depends(require_current_user)):
     return user
+
+@app.get("/api/auth/login-history")
+def get_user_login_history(user: Dict[str, Any] = Depends(require_current_user)):
+    return db_service.get_login_history(user_id=user["id"], limit=15)
+
 
 @app.get("/api/user/faqs")
 def get_user_faqs(user: Optional[Dict[str, Any]] = Depends(get_current_user)):

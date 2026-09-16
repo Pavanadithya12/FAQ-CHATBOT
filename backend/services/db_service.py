@@ -10,12 +10,6 @@ logger = logging.getLogger(__name__)
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "chat_history.db")
 
 class DatabaseService:
-    """
-    Persistent relational database service for:
-    1. User Authentication (credentials, tokens, accounts)
-    2. Per-User FAQ Management (upload, delete, manage personal FAQs)
-    3. Per-User Conversation History & Analytics
-    """
     def __init__(self):
         self._init_db()
 
@@ -24,7 +18,7 @@ class DatabaseService:
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
             
-            # Users table for JWT authentication
+            # Users table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +30,7 @@ class DatabaseService:
                 )
             """)
 
-            # Chat logs table with user_id foreign link
+            # Chat logs table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS chat_logs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,7 +48,7 @@ class DatabaseService:
                 )
             """)
 
-            # User-managed custom FAQs (upload/delete custom questions)
+            # User-managed custom FAQs
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS user_faqs (
                     id TEXT PRIMARY KEY,
@@ -68,8 +62,20 @@ class DatabaseService:
                 )
             """)
 
+            # Login Audit / History table
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS login_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    user_id INTEGER,
+                    username TEXT NOT NULL,
+                    timestamp TEXT NOT NULL,
+                    ip_address TEXT,
+                    status TEXT NOT NULL,
+                    FOREIGN KEY(user_id) REFERENCES users(id)
+                )
+            """)
+
             conn.commit()
-            logger.info("Database schema initialized with users, chat_logs, and user_faqs tables.")
 
     # ── User Account Operations ───────────────────────────────────────────────
     def create_user(self, username: str, email: str, hashed_password: str, full_name: str = "") -> Optional[Dict[str, Any]]:
@@ -113,6 +119,34 @@ class DatabaseService:
         except Exception as e:
             logger.error(f"Error fetching user by id: {e}")
             return None
+
+    # ── Login History Audit ───────────────────────────────────────────────────
+    def record_login(self, username: str, user_id: Optional[int] = None, ip_address: str = "127.0.0.1", status: str = "SUCCESS"):
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    INSERT INTO login_history (user_id, username, timestamp, ip_address, status)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (user_id, username, datetime.utcnow().isoformat(), ip_address, status))
+                conn.commit()
+        except Exception as e:
+            logger.error(f"Error recording login: {e}")
+
+    def get_login_history(self, user_id: Optional[int] = None, limit: int = 20) -> List[Dict[str, Any]]:
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                if user_id:
+                    cursor.execute("SELECT * FROM login_history WHERE user_id = ? ORDER BY id DESC LIMIT ?", (user_id, limit))
+                else:
+                    cursor.execute("SELECT * FROM login_history ORDER BY id DESC LIMIT ?", (limit,))
+                rows = cursor.fetchall()
+                return [dict(row) for row in rows]
+        except Exception as e:
+            logger.error(f"Error fetching login history: {e}")
+            return []
 
     # ── User FAQ Management (Upload / Delete Questions) ───────────────────────
     def add_user_faq(self, faq_id: str, user_id: Optional[int], category: str, question: str, answer: str, keywords: List[str] = []) -> bool:
