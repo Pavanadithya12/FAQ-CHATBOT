@@ -16,16 +16,20 @@ import {
   ChevronRight, 
   Sliders, 
   CheckCircle2, 
-  AlertCircle,
-  Menu,
-  X,
-  PlusCircle,
-  Clock,
-  KeyRound,
-  Zap,
-  Layers,
-  Database,
-  Search
+  AlertCircle, 
+  Menu, 
+  X, 
+  PlusCircle, 
+  Clock, 
+  Zap, 
+  Layers, 
+  Download, 
+  BarChart3, 
+  Search, 
+  Copy, 
+  Volume2, 
+  RefreshCw,
+  FileText
 } from "lucide-react";
 
 interface MatchedFAQ {
@@ -81,6 +85,15 @@ interface UserProfile {
   full_name?: string;
 }
 
+interface AnalyticsData {
+  total_queries: number;
+  avg_confidence: number;
+  success_rate: number;
+  custom_faqs: number;
+  base_faqs: number;
+  total_knowledge_base: number;
+}
+
 export default function App() {
   // Auth state
   const [token, setToken] = useState<string | null>(null);
@@ -98,7 +111,7 @@ export default function App() {
     {
       id: "welcome",
       sender: "bot",
-      text: "👋 Welcome! I am your AI FAQ Assistant with 1500-dimensional semantic search and verified knowledge grounding.\n\nAsk me anything about account setup, billing, orders, tracking, returns, security, or manage your custom questions in Settings!",
+      text: "👋 Welcome! I am your AI FAQ Assistant with 1500-dimensional semantic search and verified knowledge grounding.\n\nAsk me anything about account setup, billing, orders, tracking, returns, security, or manage your knowledge base in Settings!",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       suggested_questions: [
         "How do I register a new account on the platform?",
@@ -111,14 +124,23 @@ export default function App() {
   const [inputQuery, setInputQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [threshold, setThreshold] = useState(0.50);
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
 
-  // Layout & Modals
+  // Layout & Settings Modals
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [chatHistory, setChatHistory] = useState<ChatLog[]>([]);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<"faqs" | "history" | "config">("faqs");
+  const [settingsTab, setSettingsTab] = useState<"faqs" | "analytics" | "audit" | "export" | "config">("faqs");
   const [userFAQs, setUserFAQs] = useState<CustomFAQ[]>([]);
   const [loginHistory, setLoginHistory] = useState<LoginLog[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData>({
+    total_queries: 0,
+    avg_confidence: 0,
+    success_rate: 100,
+    custom_faqs: 0,
+    base_faqs: 50,
+    total_knowledge_base: 50
+  });
 
   // Add FAQ form state
   const [newCategory, setNewCategory] = useState("General");
@@ -127,6 +149,7 @@ export default function App() {
   const [newKeywords, setNewKeywords] = useState("");
   const [faqActionMsg, setFaqActionMsg] = useState("");
   const [faqSearchQuery, setFaqSearchQuery] = useState("");
+  const [bulkFaqJson, setBulkFaqJson] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:8000";
@@ -154,12 +177,13 @@ export default function App() {
     }
   }, []);
 
-  // Fetch user data when token changes
+  // Fetch data on token change
   useEffect(() => {
     if (token) {
       fetchHistory();
       fetchUserFAQs();
       fetchLoginHistory();
+      fetchAnalytics();
     }
   }, [token]);
 
@@ -205,6 +229,20 @@ export default function App() {
     }
   };
 
+  const fetchAnalytics = async () => {
+    try {
+      const res = await fetch(`${backendUrl}/api/analytics`, {
+        headers: token ? { "Authorization": `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAnalytics(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch analytics:", e);
+    }
+  };
+
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError("");
@@ -232,7 +270,7 @@ export default function App() {
       localStorage.setItem("faq_auth_user", JSON.stringify(data.user));
       setAuthPassword("");
     } catch {
-      setAuthError("Could not connect to backend server on port 8000. Please run start_all.bat.");
+      setAuthError("Could not connect to backend server on port 8000. Please ensure start_all.bat is running.");
     } finally {
       setAuthLoading(false);
     }
@@ -315,6 +353,7 @@ export default function App() {
       setMessages(prev => [...prev, botMessage]);
       if (token) {
         fetchHistory();
+        fetchAnalytics();
       }
     } catch {
       setMessages(prev => [
@@ -322,7 +361,7 @@ export default function App() {
         {
           id: (Date.now() + 1).toString(),
           sender: "bot",
-          text: "I encountered an issue connecting to the backend API on port 8000. Please verify the backend is running.",
+          text: "I encountered an issue connecting to the backend API on port 8000. Please verify `start_all.bat` is running.",
           is_fallback: true,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
@@ -354,17 +393,52 @@ export default function App() {
       });
 
       if (res.ok) {
-        setFaqActionMsg("✅ Question successfully added and indexed into 1500-dim vector database!");
+        setFaqActionMsg("✅ Question successfully indexed into 1500-dim vector database!");
         setNewQuestion("");
         setNewAnswer("");
         setNewKeywords("");
         fetchUserFAQs();
+        fetchAnalytics();
         setTimeout(() => setFaqActionMsg(""), 3500);
       } else {
         setFaqActionMsg("Failed to add question.");
       }
     } catch {
       setFaqActionMsg("Error communicating with backend.");
+    }
+  };
+
+  const handleBulkUpload = async () => {
+    try {
+      const items = JSON.parse(bulkFaqJson);
+      if (!Array.isArray(items)) {
+        alert("Please provide a valid JSON array of FAQ objects.");
+        return;
+      }
+      setFaqActionMsg(`Bulk uploading and vector indexing ${items.length} questions...`);
+      for (const item of items) {
+        if (item.question && item.answer) {
+          await fetch(`${backendUrl}/api/user/faqs`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { "Authorization": `Bearer ${token}` } : {})
+            },
+            body: JSON.stringify({
+              category: item.category || "General",
+              question: item.question,
+              answer: item.answer,
+              keywords: item.keywords || []
+            })
+          });
+        }
+      }
+      setFaqActionMsg("✅ Bulk upload completed!");
+      setBulkFaqJson("");
+      fetchUserFAQs();
+      fetchAnalytics();
+    } catch {
+      alert("Invalid JSON format. Expected: [{'category': 'Support', 'question': '...', 'answer': '...'}]");
     }
   };
 
@@ -377,6 +451,7 @@ export default function App() {
       });
       if (res.ok) {
         fetchUserFAQs();
+        fetchAnalytics();
       }
     } catch (e) {
       console.error("Failed to delete FAQ:", e);
@@ -392,10 +467,43 @@ export default function App() {
       });
       if (res.ok) {
         setChatHistory([]);
+        fetchAnalytics();
         handleNewChat();
       }
     } catch (e) {
       console.error("Failed to clear history:", e);
+    }
+  };
+
+  const handleExportData = () => {
+    const exportObj = {
+      export_date: new Date().toISOString(),
+      user: currentUser?.username,
+      total_faqs: userFAQs.length + 50,
+      custom_faqs: userFAQs,
+      chat_history: chatHistory
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj, null, 2));
+    const downloadAnchor = document.createElement("a");
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `faq_chatbot_knowledge_base_${currentUser?.username || "export"}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  const handleCopyText = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopyFeedback(id);
+    setTimeout(() => setCopyFeedback(null), 2000);
+  };
+
+  const handleSpeakText = (text: string) => {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
     }
   };
 
@@ -405,11 +513,9 @@ export default function App() {
   if (!token || !currentUser) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-[#131417] p-4 font-sans text-gray-100">
-        {/* Ambient background glow */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-transparent to-transparent pointer-events-none" />
 
         <div className="relative w-full max-w-md rounded-3xl border border-[#2a2c33] bg-[#1a1c22]/95 p-8 shadow-2xl backdrop-blur-xl">
-          {/* Logo & Header */}
           <div className="flex flex-col items-center text-center mb-6">
             <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-lg shadow-emerald-500/20">
               <Bot size={30} />
@@ -418,11 +524,10 @@ export default function App() {
               Enterprise FAQ Chatbot
             </h1>
             <p className="mt-1 text-xs text-gray-400">
-              Grounded AI Assistant • 1500-Dim Semantic Search • JWT Authentication
+              Grounded AI Assistant • 1500-Dim Semantic Space • JWT Authentication
             </p>
           </div>
 
-          {/* Mode Tabs */}
           <div className="grid grid-cols-2 gap-1 rounded-xl bg-[#23252d] p-1 mb-6 border border-[#2f323c]">
             <button
               onClick={() => {
@@ -452,7 +557,6 @@ export default function App() {
             </button>
           </div>
 
-          {/* Error Banner */}
           {authError && (
             <div className="mb-4 flex items-center gap-2 rounded-xl bg-rose-950/80 border border-rose-800/80 p-3 text-xs text-rose-300">
               <AlertCircle size={15} className="shrink-0 text-rose-400" />
@@ -460,7 +564,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleAuthSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-gray-300 mb-1">
@@ -531,7 +634,6 @@ export default function App() {
             </button>
           </form>
 
-          {/* Footer credentials hint */}
           <div className="mt-6 border-t border-[#292c35] pt-4 text-center text-xs text-gray-400">
             <span className="flex items-center justify-center gap-1 text-[11px] text-emerald-400 font-medium">
               <Shield size={12} />
@@ -544,7 +646,7 @@ export default function App() {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 2. MAIN APPLICATION (Unique ChatGPT Style Interface)
+  // 2. MAIN APPLICATION (Enhanced ChatGPT Style Interface)
   // ═══════════════════════════════════════════════════════════════════════════
   const filteredUserFAQs = userFAQs.filter(f => 
     f.question.toLowerCase().includes(faqSearchQuery.toLowerCase()) ||
@@ -561,7 +663,7 @@ export default function App() {
         } transition-all duration-300 ease-in-out bg-[#141518] border-r border-[#26282f] flex flex-col justify-between z-30 shrink-0 select-none`}
       >
         <div className="p-3.5 flex flex-col h-full overflow-hidden">
-          {/* Top: New Chat Button */}
+          {/* New Chat Button */}
           <div className="flex items-center gap-2 mb-3">
             <button
               onClick={handleNewChat}
@@ -579,6 +681,18 @@ export default function App() {
             >
               <X size={18} />
             </button>
+          </div>
+
+          {/* Quick Metrics Badge in sidebar */}
+          <div className="grid grid-cols-2 gap-2 mb-3 px-1">
+            <div className="bg-[#1b1d22] border border-[#262830] rounded-xl p-2 text-center">
+              <span className="text-[10px] text-gray-400 block">Knowledge Base</span>
+              <span className="text-xs font-bold text-emerald-400">{analytics.total_knowledge_base} FAQs</span>
+            </div>
+            <div className="bg-[#1b1d22] border border-[#262830] rounded-xl p-2 text-center">
+              <span className="text-[10px] text-gray-400 block">Vector Space</span>
+              <span className="text-xs font-bold text-blue-400">1500-Dim</span>
+            </div>
           </div>
 
           {/* Center: Chat History List */}
@@ -601,7 +715,7 @@ export default function App() {
 
             {chatHistory.length === 0 ? (
               <div className="text-xs text-gray-500 px-3 py-6 text-center italic bg-[#18191d] rounded-xl border border-[#23252a] my-2">
-                No past questions yet. Ask anything in the chat!
+                No past queries yet. Ask anything in the chat!
               </div>
             ) : (
               chatHistory.map(item => (
@@ -617,9 +731,8 @@ export default function App() {
             )}
           </div>
 
-          {/* Bottom Actions: Clear Settings Logo on the left */}
+          {/* ⭐ PROMINENT SETTINGS BUTTON WITH LOGO ON LEFT */}
           <div className="pt-3 border-t border-[#23252a] space-y-1.5">
-            {/* ⭐ VISIBLE SETTINGS BUTTON WITH PROMINENT LOGO ON LEFT */}
             <button
               onClick={() => {
                 setSettingsTab("faqs");
@@ -633,7 +746,9 @@ export default function App() {
                 </div>
                 <span>Control Center & Settings</span>
               </div>
-              <ChevronRight size={14} className="text-gray-500 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
+              <span className="text-[10px] bg-emerald-900/60 text-emerald-300 px-1.5 py-0.5 rounded font-mono">
+                {userFAQs.length} custom
+              </span>
             </button>
           </div>
 
@@ -664,7 +779,7 @@ export default function App() {
         </div>
       </aside>
 
-      {/* ─── MAIN CHAT AREA (Unique ChatGPT Style Layout) ────────────────── */}
+      {/* ─── MAIN CHAT AREA ──────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col h-full relative bg-[#1e1f24] overflow-hidden">
         {/* Header Bar */}
         <header className="h-14 border-b border-[#292b33] flex items-center justify-between px-5 bg-[#1a1b20]/90 backdrop-blur-md z-20">
@@ -714,7 +829,6 @@ export default function App() {
                     : "bg-transparent"
                 }`}
               >
-                {/* Avatar */}
                 <div className="shrink-0 mt-0.5">
                   {msg.sender === "bot" ? (
                     <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-900/30">
@@ -727,20 +841,40 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Body */}
                 <div className="flex-1 space-y-2.5 overflow-hidden">
                   <div className="flex items-center justify-between text-xs text-gray-400">
                     <span className="font-bold text-gray-200">
                       {msg.sender === "bot" ? "AI FAQ Assistant" : currentUser.username}
                     </span>
-                    <span className="text-[11px] text-gray-500 font-mono">{msg.timestamp}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleCopyText(msg.text, msg.id)}
+                        title="Copy answer"
+                        className="text-gray-400 hover:text-white p-1 rounded hover:bg-[#343743] transition"
+                      >
+                        {copyFeedback === msg.id ? (
+                          <span className="text-[10px] text-emerald-400 font-bold">Copied!</span>
+                        ) : (
+                          <Copy size={13} />
+                        )}
+                      </button>
+                      {msg.sender === "bot" && (
+                        <button
+                          onClick={() => handleSpeakText(msg.text)}
+                          title="Read out loud"
+                          className="text-gray-400 hover:text-white p-1 rounded hover:bg-[#343743] transition"
+                        >
+                          <Volume2 size={13} />
+                        </button>
+                      )}
+                      <span className="text-[11px] text-gray-500 font-mono">{msg.timestamp}</span>
+                    </div>
                   </div>
 
                   <div className="text-sm text-gray-100 whitespace-pre-line leading-relaxed">
                     {msg.text}
                   </div>
 
-                  {/* Badges */}
                   {msg.sender === "bot" && (msg.matched_faq || msg.confidence_score !== undefined) && (
                     <div className="pt-2 flex flex-wrap items-center gap-2 text-xs">
                       {msg.confidence_score !== undefined && (
@@ -762,7 +896,6 @@ export default function App() {
                     </div>
                   )}
 
-                  {/* Suggested questions */}
                   {msg.suggested_questions && msg.suggested_questions.length > 0 && (
                     <div className="pt-3 space-y-2">
                       <div className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">
@@ -801,7 +934,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Chat Input */}
+        {/* Input bar */}
         <div className="p-4 bg-gradient-to-t from-[#1e1f24] via-[#1e1f24] to-transparent">
           <div className="max-w-3xl mx-auto">
             <form 
@@ -840,8 +973,7 @@ export default function App() {
       </main>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          3. SEPARATE SETTINGS & CONTROL CENTER MODAL
-          Tabs: 1) FAQ Management (Upload/Delete), 2) Audit & History, 3) AI Config
+          3. FULL-FEATURED 5-TAB CONTROL CENTER & SETTINGS MODAL
          ═══════════════════════════════════════════════════════════════════════ */}
       {showSettingsModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
@@ -854,7 +986,7 @@ export default function App() {
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-white leading-tight">Control Center & Settings</h2>
-                  <p className="text-[11px] text-gray-400">Manage custom questions, audit history, and vector space calibration</p>
+                  <p className="text-[11px] text-gray-400">Manage custom questions, analytics, audit history, and calibration</p>
                 </div>
               </div>
               <button
@@ -865,24 +997,42 @@ export default function App() {
               </button>
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="flex border-b border-[#2b2e37] bg-[#16171c] px-6">
+            {/* 5 Distinct Settings Tabs */}
+            <div className="flex border-b border-[#2b2e37] bg-[#16171c] px-4 overflow-x-auto scrollbar-none">
               <button
                 onClick={() => setSettingsTab("faqs")}
-                className={`flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 transition ${
+                className={`flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 whitespace-nowrap transition ${
                   settingsTab === "faqs"
                     ? "border-emerald-500 text-emerald-400"
                     : "border-transparent text-gray-400 hover:text-gray-200"
                 }`}
               >
                 <BookOpen size={14} />
-                <span>Upload & Delete Questions ({userFAQs.length})</span>
+                <span>Upload & Delete Questions</span>
               </button>
 
               <button
-                onClick={() => setSettingsTab("history")}
-                className={`flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 transition ${
-                  settingsTab === "history"
+                onClick={() => {
+                  setSettingsTab("analytics");
+                  fetchAnalytics();
+                }}
+                className={`flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 whitespace-nowrap transition ${
+                  settingsTab === "analytics"
+                    ? "border-emerald-500 text-emerald-400"
+                    : "border-transparent text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                <BarChart3 size={14} />
+                <span>Live Analytics</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setSettingsTab("audit");
+                  fetchLoginHistory();
+                }}
+                className={`flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 whitespace-nowrap transition ${
+                  settingsTab === "audit"
                     ? "border-emerald-500 text-emerald-400"
                     : "border-transparent text-gray-400 hover:text-gray-200"
                 }`}
@@ -892,28 +1042,40 @@ export default function App() {
               </button>
 
               <button
+                onClick={() => setSettingsTab("export")}
+                className={`flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 whitespace-nowrap transition ${
+                  settingsTab === "export"
+                    ? "border-emerald-500 text-emerald-400"
+                    : "border-transparent text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                <Download size={14} />
+                <span>Export Data</span>
+              </button>
+
+              <button
                 onClick={() => setSettingsTab("config")}
-                className={`flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 transition ${
+                className={`flex items-center gap-2 py-3 px-3 text-xs font-bold border-b-2 whitespace-nowrap transition ${
                   settingsTab === "config"
                     ? "border-emerald-500 text-emerald-400"
                     : "border-transparent text-gray-400 hover:text-gray-200"
                 }`}
               >
                 <Sliders size={14} />
-                <span>System Calibration</span>
+                <span>Model Calibration</span>
               </button>
             </div>
 
             {/* Tab Body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin">
-              {/* TAB 1: FAQ MANAGEMENT */}
+              {/* TAB 1: FAQ MANAGEMENT (Single + Bulk Upload) */}
               {settingsTab === "faqs" && (
                 <div className="space-y-6">
-                  {/* Upload new question card */}
+                  {/* Single Question Form */}
                   <div className="rounded-2xl border border-[#30333e] bg-[#22242c] p-5 space-y-3.5 shadow-sm">
                     <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
                       <PlusCircle size={15} />
-                      <span>Upload / Add New Question to 1500-Dim Vector Base</span>
+                      <span>Upload Single Question to 1500-Dim Vector Base</span>
                     </div>
 
                     {faqActionMsg && (
@@ -960,7 +1122,7 @@ export default function App() {
                           required
                           value={newQuestion}
                           onChange={(e) => setNewQuestion(e.target.value)}
-                          placeholder="e.g. How do I request express physical courier delivery?"
+                          placeholder="e.g. How do I request express courier delivery?"
                           className="w-full rounded-xl bg-[#17181d] border border-[#383b47] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
                         />
                       </div>
@@ -989,7 +1151,31 @@ export default function App() {
                     </form>
                   </div>
 
-                  {/* List / Search custom questions */}
+                  {/* Bulk Upload Section */}
+                  <div className="rounded-2xl border border-[#30333e] bg-[#22242c] p-4 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-gray-300 flex items-center gap-1.5">
+                        <FileText size={14} className="text-blue-400" />
+                        <span>Bulk JSON Upload (Import Multiple Questions)</span>
+                      </span>
+                    </div>
+                    <textarea
+                      rows={2}
+                      value={bulkFaqJson}
+                      onChange={(e) => setBulkFaqJson(e.target.value)}
+                      placeholder='[{"category":"Support","question":"Where are our branches?","answer":"We have branches in NYC and London."}]'
+                      className="w-full font-mono rounded-xl bg-[#17181d] border border-[#383b47] p-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                    />
+                    <button
+                      onClick={handleBulkUpload}
+                      disabled={!bulkFaqJson.trim()}
+                      className="py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-xs font-bold transition"
+                    >
+                      Import & Index All (1500-dim)
+                    </button>
+                  </div>
+
+                  {/* List & Search custom questions */}
                   <div className="space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <h3 className="text-xs font-bold uppercase tracking-wider text-gray-300">
@@ -1018,7 +1204,7 @@ export default function App() {
                             key={faq.id}
                             className="p-3.5 rounded-xl bg-[#22242c] border border-[#30333e] flex items-start justify-between gap-3 hover:border-[#3e4250] transition"
                           >
-                            <div className="space-y-1">
+                            <div className="space-y-1 flex-1">
                               <div className="flex items-center gap-2">
                                 <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60">
                                   {faq.category}
@@ -1043,8 +1229,61 @@ export default function App() {
                 </div>
               )}
 
-              {/* TAB 2: LOGIN AUDIT & SESSION HISTORY */}
-              {settingsTab === "history" && (
+              {/* TAB 2: LIVE SYSTEM ANALYTICS */}
+              {settingsTab === "analytics" && (
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-200">
+                        Chatbot Health & Performance Metrics
+                      </h3>
+                      <p className="text-[11px] text-gray-400">Live statistics computed from SQLite and vector search logs</p>
+                    </div>
+                    <button
+                      onClick={fetchAnalytics}
+                      className="p-1.5 rounded-lg bg-[#22242c] text-emerald-400 hover:bg-[#292b34] transition"
+                      title="Refresh statistics"
+                    >
+                      <RefreshCw size={14} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="p-4 rounded-2xl bg-[#22242c] border border-[#30333e]">
+                      <span className="text-gray-400 text-[10px] uppercase font-bold block mb-1">Total User Inquiries</span>
+                      <span className="text-2xl font-extrabold text-white">{analytics.total_queries}</span>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#22242c] border border-[#30333e]">
+                      <span className="text-gray-400 text-[10px] uppercase font-bold block mb-1">Resolution Success Rate</span>
+                      <span className="text-2xl font-extrabold text-emerald-400">{analytics.success_rate}%</span>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#22242c] border border-[#30333e]">
+                      <span className="text-gray-400 text-[10px] uppercase font-bold block mb-1">Avg Confidence Score</span>
+                      <span className="text-2xl font-extrabold text-blue-400">{analytics.avg_confidence}%</span>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#22242c] border border-[#30333e]">
+                      <span className="text-gray-400 text-[10px] uppercase font-bold block mb-1">Base Enterprise FAQs</span>
+                      <span className="text-2xl font-extrabold text-purple-400">{analytics.base_faqs}</span>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#22242c] border border-[#30333e]">
+                      <span className="text-gray-400 text-[10px] uppercase font-bold block mb-1">Custom User FAQs</span>
+                      <span className="text-2xl font-extrabold text-teal-400">{analytics.custom_faqs}</span>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#22242c] border border-[#30333e]">
+                      <span className="text-gray-400 text-[10px] uppercase font-bold block mb-1">Total Indexed Vectors</span>
+                      <span className="text-2xl font-extrabold text-amber-400">{analytics.total_knowledge_base}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: LOGIN AUDIT & SESSION HISTORY */}
+              {settingsTab === "audit" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -1102,10 +1341,31 @@ export default function App() {
                 </div>
               )}
 
-              {/* TAB 3: SYSTEM CALIBRATION & NEW UNIQUE SETTINGS */}
+              {/* TAB 4: EXPORT KNOWLEDGE BASE */}
+              {settingsTab === "export" && (
+                <div className="space-y-4">
+                  <div className="p-5 rounded-2xl bg-[#22242c] border border-[#30333e] space-y-3">
+                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                      <Download size={15} />
+                      <span>Export Full Knowledge Base & Chat History</span>
+                    </div>
+                    <p className="text-xs text-gray-300 leading-relaxed">
+                      Download your entire FAQ database (including base questions, your custom uploaded questions, and complete conversational session history) as a formatted JSON document for backups or external migrations.
+                    </p>
+                    <button
+                      onClick={handleExportData}
+                      className="py-2.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow transition"
+                    >
+                      <Download size={14} />
+                      <span>Download JSON Backup</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: SYSTEM CALIBRATION & SPEC SHEET */}
               {settingsTab === "config" && (
                 <div className="space-y-5 text-xs">
-                  {/* Confidence Slider */}
                   <div className="p-4 rounded-2xl bg-[#22242c] border border-[#30333e] space-y-2">
                     <div className="flex justify-between items-center">
                       <label className="font-bold text-gray-200">
@@ -1129,7 +1389,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Architecture specs card */}
                   <div className="p-4 rounded-2xl bg-[#22242c] border border-[#30333e] space-y-2.5">
                     <div className="text-xs font-bold text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
                       <Layers size={14} className="text-emerald-400" />

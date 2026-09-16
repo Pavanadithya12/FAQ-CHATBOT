@@ -209,6 +209,12 @@ def clear_history(user: Dict[str, Any] = Depends(require_current_user)):
     db_service.clear_user_history(user["id"])
     return {"status": "success", "message": "Chat history cleared."}
 
+@app.get("/api/analytics")
+def get_analytics(user: Optional[Dict[str, Any]] = Depends(get_current_user)):
+    user_id = user["id"] if (user and isinstance(user, dict) and "id" in user) else None
+    return db_service.get_user_analytics(user_id)
+
+
 @app.get("/api/faqs")
 def get_all_faqs():
     faq_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "faq_data.json")

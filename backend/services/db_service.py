@@ -1,4 +1,4 @@
-﻿import sqlite3
+import sqlite3
 import os
 import json
 import logging
@@ -268,4 +268,46 @@ class DatabaseService:
             logger.error(f"Error clearing history: {e}")
             return False
 
+    def get_user_analytics(self, user_id: Optional[int] = None) -> Dict[str, Any]:
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                cursor = conn.cursor()
+                # Total queries
+                if user_id:
+                    cursor.execute("SELECT COUNT(*), AVG(confidence_score), SUM(is_fallback) FROM chat_logs WHERE user_id = ?", (user_id,))
+                else:
+                    cursor.execute("SELECT COUNT(*), AVG(confidence_score), SUM(is_fallback) FROM chat_logs")
+                row = cursor.fetchone()
+                total = row[0] or 0
+                avg_conf = round(float(row[1] or 0.0) * 100, 1)
+                fallbacks = row[2] or 0
+                success_rate = round(((total - fallbacks) / total * 100), 1) if total > 0 else 100.0
+
+                # Custom FAQs count
+                if user_id:
+                    cursor.execute("SELECT COUNT(*) FROM user_faqs WHERE user_id = ?", (user_id,))
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM user_faqs")
+                custom_count = cursor.fetchone()[0] or 0
+
+                return {
+                    "total_queries": total,
+                    "avg_confidence": avg_conf,
+                    "success_rate": success_rate,
+                    "custom_faqs": custom_count,
+                    "base_faqs": 50,
+                    "total_knowledge_base": 50 + custom_count
+                }
+        except Exception as e:
+            logger.error(f"Error computing analytics: {e}")
+            return {
+                "total_queries": 0,
+                "avg_confidence": 0.0,
+                "success_rate": 100.0,
+                "custom_faqs": 0,
+                "base_faqs": 50,
+                "total_knowledge_base": 50
+            }
+
 db_service = DatabaseService()
+
