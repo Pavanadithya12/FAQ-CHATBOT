@@ -1,13 +1,13 @@
-import json
+﻿import json
 import os
 import sys
 import logging
 
-# Ensure backend root is in sys.path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from services.embeddings import embedding_service
 from services.pinecone_service import pinecone_service
+from services.db_service import db_service
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -21,12 +21,22 @@ def run_ingestion():
     with open(faq_file, "r", encoding="utf-8") as f:
         faqs = json.load(f)
 
-    logger.info(f"Loaded {len(faqs)} FAQ records from {faq_file}.")
-    logger.info("Generating embeddings and preparing Pinecone records...")
+    # Also load any user-created FAQs from SQLite database
+    user_faqs = db_service.get_user_faqs()
+    for uf in user_faqs:
+        faqs.append({
+            "id": uf["id"],
+            "category": uf["category"],
+            "question": uf["question"],
+            "answer": uf["answer"],
+            "keywords": uf.get("keywords", [])
+        })
+
+    logger.info(f"Loaded total {len(faqs)} FAQ records (base + user-added).")
+    logger.info(f"Generating {embedding_service.dimension}-dimensional embeddings...")
 
     vectors = []
     for faq in faqs:
-        # Combine question with keywords for stronger semantic density
         text_to_embed = faq["question"]
         if faq.get("keywords"):
             text_to_embed += " " + " ".join(faq["keywords"])
@@ -44,12 +54,11 @@ def run_ingestion():
             }
         })
 
-    logger.info(f"Generated embeddings for {len(vectors)} FAQs.")
-    logger.info("Upserting vectors to Pinecone / Vector Store...")
+    logger.info(f"Generated {embedding_service.dimension}-dim vectors for {len(vectors)} FAQs.")
     success = pinecone_service.upsert_vectors(vectors)
 
     if success:
-        logger.info("✅ Ingestion successfully completed! All 50+ FAQs are indexed and ready for search.")
+        logger.info(f"✅ Ingestion successfully completed! {len(vectors)} FAQs indexed at {embedding_service.dimension} dimensions.")
     else:
         logger.error("❌ Ingestion encountered an error.")
 

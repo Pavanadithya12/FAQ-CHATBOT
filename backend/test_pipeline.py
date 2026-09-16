@@ -1,27 +1,31 @@
-import unittest
-import json
+﻿import unittest
 import os
 import sys
 
-# Add backend directory to sys.path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import ingest
-from main import app, chat_endpoint, ChatRequest, health_check
+from main import (
+    app, chat_endpoint, health_check, signup, login, 
+    add_user_faq, delete_user_faq, ChatRequest, 
+    SignupRequest, LoginRequest, CustomFAQRequest
+)
 from services.query_router import query_router
 from services.query_rewriter import query_rewriter
 from services.answer_selector import answer_selector
 from services.fallback import fallback_handler
+from services.auth_service import auth_service
+from services.db_service import db_service
 
 class TestFAQChatbotPipeline(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Run ingestion to index all FAQs
         ingest.run_ingestion()
 
     def test_01_health_check(self):
         status = health_check()
         self.assertEqual(status["status"], "online")
+        self.assertEqual(status["embedding_dimension"], 1500)
         self.assertIn("default_threshold", status)
 
     def test_02_query_router_greeting(self):
@@ -65,10 +69,29 @@ class TestFAQChatbotPipeline(unittest.TestCase):
         self.assertGreater(len(res.suggested_questions), 0)
 
     def test_09_threshold_cutoff(self):
-        # With threshold 0.999, standard questions should fail threshold and trigger fallback
         req = ChatRequest(question="How do I reset my password?", threshold=0.999)
         res = chat_endpoint(req)
         self.assertTrue(res.is_fallback)
+
+    def test_10_jwt_auth_and_user_faq_lifecycle(self):
+        import uuid
+        unique_user = f"unit_{uuid.uuid4().hex[:6]}"
+        s_req = SignupRequest(username=unique_user, email=f"{unique_user}@example.com", password="password123")
+        auth_res = signup(s_req)
+        self.assertTrue(bool(auth_res.access_token))
+        
+        token_payload = auth_service.verify_token(auth_res.access_token)
+        self.assertIsNotNone(token_payload)
+        self.assertEqual(token_payload["username"], unique_user)
+
+        user_dict = auth_res.user
+        faq_req = CustomFAQRequest(category="Test", question="How to unit test custom questions?", answer="Call add_user_faq endpoint.")
+        add_res = add_user_faq(faq_req, user=user_dict)
+        self.assertEqual(add_res["status"], "success")
+
+        # Delete user FAQ
+        del_res = delete_user_faq(add_res["faq_id"], user=user_dict)
+        self.assertEqual(del_res["status"], "success")
 
 if __name__ == "__main__":
     unittest.main()
