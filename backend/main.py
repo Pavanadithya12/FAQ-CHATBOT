@@ -173,21 +173,11 @@ def add_user_faq(req: CustomFAQRequest, user: Optional[Dict[str, Any]] = Depends
     if not success:
         raise HTTPException(status_code=500, detail="Failed to save custom question.")
 
-    text_to_embed = req.question + " " + " ".join(req.keywords or [])
-    emb = embedding_service.get_embedding(text_to_embed)
-    pinecone_service.upsert_vectors([{
-        "id": faq_id,
-        "values": emb,
-        "metadata": {
-            "id": faq_id,
-            "category": req.category,
-            "question": req.question,
-            "answer": req.answer,
-            "keywords": req.keywords or []
-        }
-    }])
+    # Refresh active vector index with both base and all user FAQs
+    ingest.run_ingestion()
 
     return {"status": "success", "faq_id": faq_id, "message": "Custom question added and indexed into vector database."}
+
 
 @app.delete("/api/user/faqs/{faq_id}")
 def delete_user_faq(faq_id: str, user: Optional[Dict[str, Any]] = Depends(get_current_user)):

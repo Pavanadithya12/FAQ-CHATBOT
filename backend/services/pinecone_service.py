@@ -67,10 +67,14 @@ class PineconeService:
             except Exception as e:
                 logger.error(f"Failed to upsert to Pinecone: {e}. Storing locally.")
 
-        # Local fallback store
-        self._local_vectors = [v for v in vectors]
-        logger.info(f"Stored {len(vectors)} vectors in local memory store.")
+        # Local fallback store: merge/update by id so previous FAQs are not wiped
+        existing_map = {item["id"]: item for item in self._local_vectors}
+        for v in vectors:
+            existing_map[v["id"]] = v
+        self._local_vectors = list(existing_map.values())
+        logger.info(f"Stored {len(vectors)} vectors in local memory store (total active: {len(self._local_vectors)}).")
         return True
+
 
     def query(self, query_vector: List[float], top_k: int = 3) -> List[Dict[str, Any]]:
         """Queries Pinecone or local store for top_k nearest matches."""
