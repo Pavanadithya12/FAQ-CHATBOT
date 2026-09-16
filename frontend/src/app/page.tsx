@@ -29,8 +29,16 @@ import {
   Copy, 
   Volume2, 
   RefreshCw,
-  FileText
+  FileText,
+  Mic,
+  MicOff,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  Filter
 } from "lucide-react";
+
+import baseFaqData from "@/data/faq_data.json";
 
 interface MatchedFAQ {
   id: string;
@@ -111,7 +119,7 @@ export default function App() {
     {
       id: "welcome",
       sender: "bot",
-      text: "👋 Welcome! I am your AI FAQ Assistant with 1500-dimensional semantic search and verified knowledge grounding.\n\nAsk me anything about account setup, billing, orders, tracking, returns, security, or manage your knowledge base in Settings!",
+      text: "👋 Welcome! I am your AI FAQ Assistant with 1500-dimensional semantic search and verified knowledge grounding.\n\nAsk me anything or browse our 50 verified questions from the right-hand panel or bottom suggestions!",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       suggested_questions: [
         "How do I register a new account on the platform?",
@@ -126,8 +134,16 @@ export default function App() {
   const [threshold, setThreshold] = useState(0.50);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
 
+  // Speech Recognition (Google Web Speech API)
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
   // Layout & Settings Modals
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("All");
+  const [questionSearch, setQuestionSearch] = useState("");
+
   const [chatHistory, setChatHistory] = useState<ChatLog[]>([]);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [settingsTab, setSettingsTab] = useState<"faqs" | "analytics" | "audit" | "export" | "config">("faqs");
@@ -161,6 +177,54 @@ export default function App() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setInputQuery(prev => (prev ? prev + " " + transcript : transcript));
+          setIsListening(false);
+        };
+
+        recognition.onerror = () => {
+          setIsListening(false);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognitionRef.current = recognition;
+      }
+    }
+  }, []);
+
+  const toggleVoiceTyping = () => {
+    if (!recognitionRef.current) {
+      alert("Voice speech recognition is supported in Google Chrome, Edge, and Safari.");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Speech recognition error:", err);
+      }
+    }
+  };
 
   // Read saved session
   useEffect(() => {
@@ -507,6 +571,24 @@ export default function App() {
     }
   };
 
+  // Combine Base 50 FAQs + User Custom FAQs for the Question Directory
+  const allDirectoryFAQs = [
+    ...baseFaqData.map((f: any) => ({ ...f, is_custom: false })),
+    ...userFAQs.map(f => ({ ...f, is_custom: true }))
+  ];
+
+  // Distinct categories
+  const categories = ["All", ...Array.from(new Set(allDirectoryFAQs.map(f => f.category)))];
+
+  // Filtered FAQ questions for the Question Directory
+  const displayedDirectoryFAQs = allDirectoryFAQs.filter(f => {
+    const matchesCat = selectedCategoryFilter === "All" || f.category === selectedCategoryFilter;
+    const matchesSearch = !questionSearch || 
+      f.question.toLowerCase().includes(questionSearch.toLowerCase()) || 
+      f.category.toLowerCase().includes(questionSearch.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
+
   // ═══════════════════════════════════════════════════════════════════════════
   // 1. MANDATORY UPFRONT AUTHENTICATION GATE (Center of screen)
   // ═══════════════════════════════════════════════════════════════════════════
@@ -646,7 +728,7 @@ export default function App() {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 2. MAIN APPLICATION (Enhanced ChatGPT Style Interface)
+  // 2. MAIN CHATGPT-STYLE APPLICATION WITH VOICE TYPING & 50-FAQ DIRECTORY
   // ═══════════════════════════════════════════════════════════════════════════
   const filteredUserFAQs = userFAQs.filter(f => 
     f.question.toLowerCase().includes(faqSearchQuery.toLowerCase()) ||
@@ -683,17 +765,36 @@ export default function App() {
             </button>
           </div>
 
-          {/* Quick Metrics Badge in sidebar */}
-          <div className="grid grid-cols-2 gap-2 mb-3 px-1">
-            <div className="bg-[#1b1d22] border border-[#262830] rounded-xl p-2 text-center">
-              <span className="text-[10px] text-gray-400 block">Knowledge Base</span>
-              <span className="text-xs font-bold text-emerald-400">{analytics.total_knowledge_base} FAQs</span>
+          {/* ⭐ VOICE TYPING (SPEECH-TO-TEXT) BUTTON IN LEFT SIDEBAR */}
+          <button
+            onClick={toggleVoiceTyping}
+            className={`flex items-center justify-between px-3.5 py-2.5 mb-3 rounded-xl border text-xs font-semibold transition-all ${
+              isListening 
+                ? "bg-rose-950/80 border-rose-600 text-rose-300 shadow-md shadow-rose-900/30 animate-pulse" 
+                : "bg-[#1c1e23] hover:bg-[#24272e] border-[#2d3039] text-gray-200"
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              {isListening ? (
+                <div className="p-1 rounded-lg bg-rose-600 text-white animate-bounce">
+                  <Mic size={15} />
+                </div>
+              ) : (
+                <div className="p-1 rounded-lg bg-emerald-950 text-emerald-400 border border-emerald-800">
+                  <Mic size={15} />
+                </div>
+              )}
+              <div className="text-left">
+                <div className="text-xs font-bold leading-tight">
+                  {isListening ? "Listening... Speak Now" : "Voice Typing (Speech to Text)"}
+                </div>
+                <div className="text-[10px] text-gray-400">Google Web Speech Engine</div>
+              </div>
             </div>
-            <div className="bg-[#1b1d22] border border-[#262830] rounded-xl p-2 text-center">
-              <span className="text-[10px] text-gray-400 block">Vector Space</span>
-              <span className="text-xs font-bold text-blue-400">1500-Dim</span>
-            </div>
-          </div>
+            {isListening && (
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            )}
+          </button>
 
           {/* Center: Chat History List */}
           <div className="flex-1 overflow-y-auto pr-1 space-y-1 my-2 scrollbar-thin">
@@ -781,7 +882,7 @@ export default function App() {
 
       {/* ─── MAIN CHAT AREA ──────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col h-full relative bg-[#1e1f24] overflow-hidden">
-        {/* Header Bar */}
+        {/* Top Header Bar */}
         <header className="h-14 border-b border-[#292b33] flex items-center justify-between px-5 bg-[#1a1b20]/90 backdrop-blur-md z-20">
           <div className="flex items-center gap-3">
             {!sidebarOpen && (
@@ -804,6 +905,19 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Toggle 50 FAQ Directory on right */}
+            <button
+              onClick={() => setRightPanelOpen(!rightPanelOpen)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition ${
+                rightPanelOpen 
+                  ? "bg-emerald-950/80 border-emerald-700 text-emerald-300" 
+                  : "bg-[#262830] hover:bg-[#2e303a] border-[#343743] text-gray-200"
+              }`}
+            >
+              <BookOpen size={14} className="text-emerald-400" />
+              <span>50 FAQs Directory</span>
+            </button>
+
             <button
               onClick={() => {
                 setSettingsTab("faqs");
@@ -875,6 +989,7 @@ export default function App() {
                     {msg.text}
                   </div>
 
+                  {/* Badges */}
                   {msg.sender === "bot" && (msg.matched_faq || msg.confidence_score !== undefined) && (
                     <div className="pt-2 flex flex-wrap items-center gap-2 text-xs">
                       {msg.confidence_score !== undefined && (
@@ -896,6 +1011,7 @@ export default function App() {
                     </div>
                   )}
 
+                  {/* Suggested questions */}
                   {msg.suggested_questions && msg.suggested_questions.length > 0 && (
                     <div className="pt-3 space-y-2">
                       <div className="text-[10px] uppercase tracking-wider text-gray-400 font-bold">
@@ -934,7 +1050,30 @@ export default function App() {
           </div>
         </div>
 
-        {/* Input bar */}
+        {/* ⭐ BOTTOM SUGGESTIONS CAROUSEL (Quick Clickable FAQ Topics) */}
+        <div className="px-4 py-2 border-t border-[#262830] bg-[#1a1b20]/60 overflow-x-auto scrollbar-none flex items-center gap-2">
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
+            <Sparkles size={11} className="text-amber-400" />
+            Quick Prompts:
+          </span>
+          {[
+            "How can I reset my forgotten password?",
+            "What is the standard refund policy?",
+            "How can I track the live delivery status of my physical shipment?",
+            "How do I configure Two-Factor Authentication (2FA)?",
+            "What payment methods and currencies do you support?"
+          ].map((prompt, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleSendMessage(prompt)}
+              className="text-xs bg-[#24262f] hover:bg-[#2e323e] text-gray-300 hover:text-white px-3 py-1.5 rounded-full border border-[#343743] whitespace-nowrap transition shrink-0"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+
+        {/* Input Bar with Voice Typing Mic & Send Button */}
         <div className="p-4 bg-gradient-to-t from-[#1e1f24] via-[#1e1f24] to-transparent">
           <div className="max-w-3xl mx-auto">
             <form 
@@ -953,10 +1092,25 @@ export default function App() {
                     handleSendMessage();
                   }
                 }}
-                placeholder="Ask about orders, tracking, refunds, accounts, or custom FAQs..."
+                placeholder={isListening ? "Listening... Speak your question now!" : "Type a question or use voice typing..."}
                 rows={1}
                 className="w-full bg-transparent px-4 py-3.5 text-sm text-gray-100 placeholder-gray-400 focus:outline-none resize-none max-h-32"
               />
+
+              {/* Voice Typing Mic button inside input bar */}
+              <button
+                type="button"
+                onClick={toggleVoiceTyping}
+                title="Click to speak (Speech to text)"
+                className={`p-2.5 mr-1 rounded-xl transition ${
+                  isListening
+                    ? "bg-rose-600 text-white animate-pulse"
+                    : "text-gray-400 hover:text-emerald-400 hover:bg-[#343845]"
+                }`}
+              >
+                {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+              </button>
+
               <button
                 type="submit"
                 disabled={!inputQuery.trim() || loading}
@@ -966,19 +1120,107 @@ export default function App() {
               </button>
             </form>
             <div className="text-center text-[10px] text-gray-500 mt-2">
-              9-Stage Natural Semantic Pipeline • 1500 Vector Dimensions • Grounded Knowledge
+              9-Stage Natural Semantic Pipeline • 1500 Vector Dimensions • Speech-to-Text Supported
             </div>
           </div>
         </div>
       </main>
 
+      {/* ─── ⭐ RIGHT-SIDE 50 FAQ DIRECTORY & SUGGESTIONS PANEL ───────────── */}
+      {rightPanelOpen && (
+        <aside className="w-80 bg-[#15161a] border-l border-[#26282f] flex flex-col h-full z-20 shrink-0 select-none animate-in slide-in-from-right duration-200">
+          <div className="p-4 border-b border-[#26282f] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="p-1 rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-400">
+                <HelpCircle size={16} />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">FAQ Knowledge Directory</h3>
+                <span className="text-[10px] text-gray-400">{allDirectoryFAQs.length} questions available</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setRightPanelOpen(false)}
+              className="text-gray-400 hover:text-white p-1 rounded hover:bg-[#22242c] transition"
+              title="Close directory"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          {/* Search Questions */}
+          <div className="p-3 border-b border-[#26282f] space-y-2">
+            <div className="relative">
+              <Search size={13} className="absolute left-3 top-2.5 text-gray-400" />
+              <input
+                type="text"
+                value={questionSearch}
+                onChange={(e) => setQuestionSearch(e.target.value)}
+                placeholder="Search all 50 questions..."
+                className="w-full bg-[#1e2026] border border-[#2e313c] rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            {/* Category Filter Pills */}
+            <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
+              {categories.map((cat, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedCategoryFilter(cat)}
+                  className={`text-[10px] font-medium px-2.5 py-1 rounded-lg whitespace-nowrap transition ${
+                    selectedCategoryFilter === cat
+                      ? "bg-emerald-600 text-white font-bold"
+                      : "bg-[#20222a] text-gray-400 hover:text-gray-200"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Question List */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-thin">
+            <div className="text-[10px] uppercase font-bold text-gray-500 px-1">
+              Click any question to ask:
+            </div>
+            {displayedDirectoryFAQs.length === 0 ? (
+              <div className="text-xs text-gray-500 italic p-4 text-center">
+                No matching questions found in this category.
+              </div>
+            ) : (
+              displayedDirectoryFAQs.map((faq: any) => (
+                <button
+                  key={faq.id}
+                  onClick={() => handleSendMessage(faq.question)}
+                  className="w-full text-left p-2.5 rounded-xl bg-[#1d1f25] hover:bg-[#252831] border border-[#2a2c35] hover:border-emerald-700/60 transition group text-xs text-gray-200 block space-y-1"
+                >
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-emerald-400 font-medium truncate max-w-[170px]">
+                      {faq.category}
+                    </span>
+                    {faq.is_custom && (
+                      <span className="px-1.5 py-0.2 rounded bg-purple-950 text-purple-300 font-mono text-[9px] border border-purple-800">
+                        Custom
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-semibold text-gray-100 group-hover:text-emerald-300 transition-colors leading-snug">
+                    {faq.question}
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </aside>
+      )}
+
       {/* ═══════════════════════════════════════════════════════════════════════
-          3. FULL-FEATURED 5-TAB CONTROL CENTER & SETTINGS MODAL
+          4. FULL-FEATURED 5-TAB CONTROL CENTER & SETTINGS MODAL
          ═══════════════════════════════════════════════════════════════════════ */}
       {showSettingsModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-[#1a1c22] border border-[#2f323c] rounded-3xl w-full max-w-3xl max-h-[88vh] flex flex-col shadow-2xl relative overflow-hidden">
-            {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#2b2e37]">
               <div className="flex items-center gap-2.5">
                 <div className="p-1.5 rounded-xl bg-emerald-950/80 border border-emerald-800 text-emerald-400">
@@ -997,7 +1239,6 @@ export default function App() {
               </button>
             </div>
 
-            {/* 5 Distinct Settings Tabs */}
             <div className="flex border-b border-[#2b2e37] bg-[#16171c] px-4 overflow-x-auto scrollbar-none">
               <button
                 onClick={() => setSettingsTab("faqs")}
@@ -1066,12 +1307,9 @@ export default function App() {
               </button>
             </div>
 
-            {/* Tab Body */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin">
-              {/* TAB 1: FAQ MANAGEMENT (Single + Bulk Upload) */}
               {settingsTab === "faqs" && (
                 <div className="space-y-6">
-                  {/* Single Question Form */}
                   <div className="rounded-2xl border border-[#30333e] bg-[#22242c] p-5 space-y-3.5 shadow-sm">
                     <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
                       <PlusCircle size={15} />
@@ -1151,14 +1389,11 @@ export default function App() {
                     </form>
                   </div>
 
-                  {/* Bulk Upload Section */}
                   <div className="rounded-2xl border border-[#30333e] bg-[#22242c] p-4 space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-gray-300 flex items-center gap-1.5">
-                        <FileText size={14} className="text-blue-400" />
-                        <span>Bulk JSON Upload (Import Multiple Questions)</span>
-                      </span>
-                    </div>
+                    <span className="text-xs font-bold text-gray-300 flex items-center gap-1.5">
+                      <FileText size={14} className="text-blue-400" />
+                      <span>Bulk JSON Upload (Import Multiple Questions)</span>
+                    </span>
                     <textarea
                       rows={2}
                       value={bulkFaqJson}
@@ -1175,7 +1410,6 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* List & Search custom questions */}
                   <div className="space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <h3 className="text-xs font-bold uppercase tracking-wider text-gray-300">
@@ -1195,7 +1429,7 @@ export default function App() {
 
                     {filteredUserFAQs.length === 0 ? (
                       <div className="p-4 rounded-xl bg-[#22242c] border border-[#30333e] text-xs text-gray-400 italic text-center">
-                        No custom questions found. The chatbot is querying the default 50 enterprise FAQs.
+                        No custom questions found.
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -1229,7 +1463,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* TAB 2: LIVE SYSTEM ANALYTICS */}
               {settingsTab === "analytics" && (
                 <div className="space-y-5">
                   <div className="flex items-center justify-between">
@@ -1282,7 +1515,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* TAB 3: LOGIN AUDIT & SESSION HISTORY */}
               {settingsTab === "audit" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -1341,7 +1573,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* TAB 4: EXPORT KNOWLEDGE BASE */}
               {settingsTab === "export" && (
                 <div className="space-y-4">
                   <div className="p-5 rounded-2xl bg-[#22242c] border border-[#30333e] space-y-3">
@@ -1350,7 +1581,7 @@ export default function App() {
                       <span>Export Full Knowledge Base & Chat History</span>
                     </div>
                     <p className="text-xs text-gray-300 leading-relaxed">
-                      Download your entire FAQ database (including base questions, your custom uploaded questions, and complete conversational session history) as a formatted JSON document for backups or external migrations.
+                      Download your entire FAQ database as a formatted JSON document for backups or external migrations.
                     </p>
                     <button
                       onClick={handleExportData}
@@ -1363,7 +1594,6 @@ export default function App() {
                 </div>
               )}
 
-              {/* TAB 5: SYSTEM CALIBRATION & SPEC SHEET */}
               {settingsTab === "config" && (
                 <div className="space-y-5 text-xs">
                   <div className="p-4 rounded-2xl bg-[#22242c] border border-[#30333e] space-y-2">
@@ -1417,7 +1647,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Modal Footer */}
             <div className="px-6 py-3.5 border-t border-[#2b2e37] bg-[#16171c] flex justify-end">
               <button
                 onClick={() => setShowSettingsModal(false)}
