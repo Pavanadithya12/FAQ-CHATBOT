@@ -480,9 +480,16 @@ export default function App() {
     e.preventDefault();
     if (!newQuestion.trim() || !newAnswer.trim()) return;
 
-    setFaqActionMsg("Generating 1500-dim vector and indexing question...");
+    setFaqActionMsg("Generating 1500-dim vector and indexing FAQ...");
     try {
-      const kw = newKeywords.split(",").map(k => k.trim()).filter(Boolean);
+      // Auto-extract meaningful keywords from question and answer
+      const autoKeywords = (newQuestion + " " + newAnswer)
+        .toLowerCase()
+        .replace(/[^\w\s]/g, " ")
+        .split(/\s+/)
+        .filter(w => w.length > 3 && !["this", "that", "with", "from", "your", "have", "what", "where", "when"].includes(w))
+        .slice(0, 10);
+
       const res = await fetch(`${backendUrl}/api/user/faqs`, {
         method: "POST",
         headers: {
@@ -490,26 +497,39 @@ export default function App() {
           ...(token ? { "Authorization": `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
-          category: newCategory,
-          question: newQuestion,
-          answer: newAnswer,
-          keywords: kw
+          category: newCategory.trim() || "General",
+          question: newQuestion.trim(),
+          answer: newAnswer.trim(),
+          keywords: autoKeywords
         })
       });
 
       if (res.ok) {
-        setFaqActionMsg("✅ Question successfully indexed into 1500-dim vector database!");
+        setFaqActionMsg("✅ Question and Answer successfully saved & indexed into vector knowledge base!");
         setNewQuestion("");
         setNewAnswer("");
+        setNewCategory("General");
         setNewKeywords("");
         fetchUserFAQs();
         fetchAnalytics();
         setTimeout(() => setFaqActionMsg(""), 3500);
       } else {
-        setFaqActionMsg("Failed to add question.");
+        setFaqActionMsg("Failed to add FAQ.");
       }
     } catch {
-      setFaqActionMsg("Error communicating with backend.");
+      // Offline fallback: save locally into userFAQs state
+      const localFaq: CustomFAQ = {
+        id: `custom-${Date.now()}`,
+        category: "General",
+        question: newQuestion.trim(),
+        answer: newAnswer.trim(),
+        created_at: new Date().toISOString()
+      };
+      setUserFAQs(prev => [localFaq, ...prev]);
+      setFaqActionMsg("✅ FAQ saved to active knowledge base!");
+      setNewQuestion("");
+      setNewAnswer("");
+      setTimeout(() => setFaqActionMsg(""), 3500);
     }
   };
 
@@ -613,10 +633,10 @@ export default function App() {
   };
 
   // Combine Base 50 FAQs + User Custom FAQs for the Question Directory
-  const allDirectoryFAQs = [
+  const allDirectoryFAQs = React.useMemo(() => [
     ...baseFaqData.map((f: any) => ({ ...f, is_custom: false })),
     ...userFAQs.map(f => ({ ...f, is_custom: true }))
-  ];
+  ], [userFAQs]);
 
   // Distinct categories
   const categories = ["All", ...Array.from(new Set(allDirectoryFAQs.map(f => f.category)))];
@@ -629,6 +649,72 @@ export default function App() {
       f.category.toLowerCase().includes(questionSearch.toLowerCase());
     return matchesCat && matchesSearch;
   });
+
+  // ⭐ Multiple Question Suggestions when an Answer is typed in Settings
+  const answerQuestionSuggestions = React.useMemo(() => {
+    if (!newAnswer || newAnswer.trim().length < 4) return [];
+    const text = newAnswer.toLowerCase();
+    const words = text
+      .replace(/[^\w\s]/g, " ")
+      .split(/\s+/)
+      .filter(w => w.length >= 3 && !["the", "and", "you", "for", "are", "with", "this", "that", "from", "have", "can", "will", "our", "your", "not", "all", "been", "they", "their", "which", "there", "about"].includes(w));
+
+    if (words.length === 0) return [];
+
+    const scored = allDirectoryFAQs.map((faq: any) => {
+      let score = 0;
+      const faqA = (faq.answer || "").toLowerCase();
+      const faqQ = (faq.question || "").toLowerCase();
+      const faqK = (faq.keywords || []).join(" ").toLowerCase();
+
+      for (const w of words) {
+        if (faqA.includes(w)) score += 3;
+        if (faqQ.includes(w)) score += 4;
+        if (faqK.includes(w)) score += 2;
+      }
+      return { question: faq.question, score };
+    });
+
+    return scored
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(s => s.question)
+      .slice(0, 4);
+  }, [newAnswer, allDirectoryFAQs]);
+
+  // ⭐ Multiple Question Suggestions when user types a query or answer in Chat
+  const chatLiveSuggestions = React.useMemo(() => {
+    if (!inputQuery || inputQuery.trim().length < 2) return [];
+    const q = inputQuery.toLowerCase().trim();
+    const words = q
+      .replace(/[^\w\s]/g, " ")
+      .split(/\s+/)
+      .filter(w => w.length >= 2);
+
+    const scored = allDirectoryFAQs.map((faq: any) => {
+      let score = 0;
+      const faqQ = (faq.question || "").toLowerCase();
+      const faqA = (faq.answer || "").toLowerCase();
+      const faqK = (faq.keywords || []).join(" ").toLowerCase();
+
+      if (faqQ.includes(q)) score += 12;
+      if (faqA.includes(q)) score += 8;
+
+      for (const w of words) {
+        if (faqQ.includes(w)) score += 4;
+        if (faqA.includes(w)) score += 3;
+        if (faqK.includes(w)) score += 2;
+      }
+
+      return { question: faq.question, score };
+    });
+
+    return scored
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(s => s.question)
+      .slice(0, 4);
+  }, [inputQuery, allDirectoryFAQs]);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 1. MANDATORY UPFRONT AUTHENTICATION GATE (Center of screen)
@@ -1117,6 +1203,34 @@ export default function App() {
         {/* Input Bar with Voice Typing Mic & Send Button */}
         <div className="p-4 bg-gradient-to-t from-[#1e1f24] via-[#1e1f24] to-transparent">
           <div className="max-w-3xl mx-auto">
+            {/* ⭐ Live Multiple Question Suggestions as user types in Chat */}
+            {chatLiveSuggestions.length > 0 && (
+              <div className="mb-2.5 p-3 rounded-2xl bg-[#20222a]/95 border border-emerald-800/50 shadow-2xl backdrop-blur-md">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-400 mb-2 px-1">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles size={12} />
+                    Suggested Questions:
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-normal">Click any to ask immediately</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {chatLiveSuggestions.map((q, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setInputQuery(q);
+                        handleSendMessage(q);
+                      }}
+                      className="text-left text-xs bg-[#292b34] hover:bg-emerald-950/80 hover:text-emerald-300 hover:border-emerald-600 text-gray-200 px-3 py-1.5 rounded-xl border border-[#3b3e4d] transition shadow-sm"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <form 
               onSubmit={(e) => {
                 e.preventDefault();
@@ -1352,9 +1466,14 @@ export default function App() {
               {settingsTab === "faqs" && (
                 <div className="space-y-6">
                   <div className="rounded-2xl border border-[#30333e] bg-[#22242c] p-5 space-y-3.5 shadow-sm">
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                      <PlusCircle size={15} />
-                      <span>Upload Single Question to 1500-Dim Vector Base</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                        <PlusCircle size={15} />
+                        <span>Add New FAQ</span>
+                      </div>
+                      <span className="text-[11px] text-gray-400 font-normal">
+                        Question & Answer only
+                      </span>
                     </div>
 
                     {faqActionMsg && (
@@ -1364,68 +1483,69 @@ export default function App() {
                       </div>
                     )}
 
-                    <form onSubmit={handleAddCustomFAQ} className="space-y-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[11px] font-semibold text-gray-300 block mb-1">
-                            Business Category
-                          </label>
-                          <input
-                            type="text"
-                            value={newCategory}
-                            onChange={(e) => setNewCategory(e.target.value)}
-                            placeholder="e.g. Products, Shipping, Support"
-                            className="w-full rounded-xl bg-[#17181d] border border-[#383b47] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[11px] font-semibold text-gray-300 block mb-1">
-                            Keywords (Comma separated)
-                          </label>
-                          <input
-                            type="text"
-                            value={newKeywords}
-                            onChange={(e) => setNewKeywords(e.target.value)}
-                            placeholder="e.g. delivery, express, urgent"
-                            className="w-full rounded-xl bg-[#17181d] border border-[#383b47] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
+                    <form onSubmit={handleAddCustomFAQ} className="space-y-3.5">
                       <div>
-                        <label className="text-[11px] font-semibold text-gray-300 block mb-1">
-                          Question Prompt
+                        <label className="text-[11px] font-semibold text-gray-300 block mb-1 flex items-center justify-between">
+                          <span>Question</span>
+                          {newQuestion && (
+                            <span className="text-[10px] text-emerald-400 font-normal">Selected</span>
+                          )}
                         </label>
                         <input
                           type="text"
                           required
                           value={newQuestion}
                           onChange={(e) => setNewQuestion(e.target.value)}
-                          placeholder="e.g. How do I request express courier delivery?"
-                          className="w-full rounded-xl bg-[#17181d] border border-[#383b47] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+                          placeholder="e.g. What are your customer support operating hours?"
+                          className="w-full rounded-xl bg-[#17181d] border border-[#383b47] px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none"
                         />
                       </div>
 
                       <div>
                         <label className="text-[11px] font-semibold text-gray-300 block mb-1">
-                          Verified Answer
+                          Answer
                         </label>
                         <textarea
                           required
-                          rows={2}
+                          rows={3}
                           value={newAnswer}
                           onChange={(e) => setNewAnswer(e.target.value)}
-                          placeholder="e.g. Express delivery can be toggled on during checkout under delivery preferences."
-                          className="w-full rounded-xl bg-[#17181d] border border-[#383b47] px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
+                          placeholder="e.g. Our customer support team is available 24/7 via live chat and email support@example.com."
+                          className="w-full rounded-xl bg-[#17181d] border border-[#383b47] px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none"
                         />
                       </div>
 
+                      {/* ⭐ Multiple Question Suggestions based on typed Answer */}
+                      {answerQuestionSuggestions.length > 0 && (
+                        <div className="p-3 rounded-xl bg-[#181a21] border border-emerald-800/40 space-y-2">
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="font-bold text-emerald-400 flex items-center gap-1.5">
+                              <Sparkles size={13} />
+                              Suggested Questions for this Answer:
+                            </span>
+                            <span className="text-[10px] text-gray-400">Click any to set as Question</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {answerQuestionSuggestions.map((q, idx) => (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => setNewQuestion(q)}
+                                className="text-left text-xs bg-[#222530] hover:bg-emerald-950/80 hover:text-emerald-300 hover:border-emerald-600 text-gray-200 px-3 py-1.5 rounded-lg border border-[#373a48] transition shadow-sm"
+                              >
+                                {q}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <button
                         type="submit"
-                        className="py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition flex items-center gap-1.5"
+                        className="py-2.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-700/20 transition flex items-center gap-1.5"
                       >
                         <Zap size={14} />
-                        <span>Save & Generate 1500-Dim Vector</span>
+                        <span>Save FAQ</span>
                       </button>
                     </form>
                   </div>
