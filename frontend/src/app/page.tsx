@@ -1802,6 +1802,14 @@ export default function App() {
                         <span className="text-gray-400 block text-[10px]">Authentication</span>
                         <span className="font-mono text-teal-400 font-bold text-sm">JWT (HS256)</span>
                       </div>
+                      <div className="p-2.5 rounded-xl bg-[#1a1c22] border border-[#2e313b]">
+                        <span className="text-gray-400 block text-[10px]">LLM Generation</span>
+                        <span className="font-mono text-amber-400 font-bold text-sm">gpt-4o-mini / Llama-3.1</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-[#1a1c22] border border-[#2e313b]">
+                        <span className="text-gray-400 block text-[10px]">Pipeline</span>
+                        <span className="font-mono text-sky-400 font-bold text-sm">Grounded RAG (Top-K)</span>
+                      </div>
                     </div>
                   </div>
                 </div>

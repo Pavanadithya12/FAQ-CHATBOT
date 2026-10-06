@@ -15,7 +15,13 @@ services:
       - key: EMBEDDING_DIMENSION
         value: "1500"
       - key: EMBEDDING_MODEL
-        value: all-MiniLM-L6-v2
+        value: text-embedding-3-small
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+      - key: GROQ_MODEL
+        value: llama-3.1-8b-instant
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
       - key: JWT_SECRET_KEY
         sync: false
       - key: JWT_ALGORITHM

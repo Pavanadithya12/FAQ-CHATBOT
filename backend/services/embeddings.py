@@ -1,4 +1,4 @@
-﻿import logging
+import logging
 import hashlib
 import numpy as np
 import requests
@@ -37,7 +37,7 @@ class EmbeddingService:
                 }
                 payload = {
                     "input": cleaned,
-                    "model": "text-embedding-3-small",
+                    "model": self.model_name or "text-embedding-3-small",
                     "dimensions": self.dimension
                 }
                 response = requests.post("https://api.openai.com/v1/embeddings", headers=headers, json=payload, timeout=5)

@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSION: int = int(os.getenv("EMBEDDING_DIMENSION", "1500"))
     EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
     
+    # LLM (Large Language Model) configurations for response generation
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4o-mini")
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+    
     # JWT Authentication configuration
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "faq-chatbot-secret-key-super-secure-2026")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
