@@ -1804,7 +1804,7 @@ export default function App() {
                       </div>
                       <div className="p-2.5 rounded-xl bg-[#1a1c22] border border-[#2e313b]">
                         <span className="text-gray-400 block text-[10px]">LLM Generation</span>
-                        <span className="font-mono text-amber-400 font-bold text-sm">gpt-4o-mini / Llama-3.1</span>
+                        <span className="font-mono text-amber-400 font-bold text-sm">gpt-4o-mini</span>
                       </div>
                       <div className="p-2.5 rounded-xl bg-[#1a1c22] border border-[#2e313b]">
                         <span className="text-gray-400 block text-[10px]">Pipeline</span>

@@ -18,10 +18,6 @@ services:
         value: text-embedding-3-small
       - key: LLM_MODEL
         value: gpt-4o-mini
-      - key: GROQ_MODEL
-        value: llama-3.1-8b-instant
-      - key: GEMINI_MODEL
-        value: gemini-1.5-flash
       - key: JWT_SECRET_KEY
         sync: false
       - key: JWT_ALGORITHM

@@ -16,19 +16,9 @@ class ResponseWriter:
         faq_a = metadata.get("answer", "")
         category = metadata.get("category", "General")
 
-        # Try LLM grounding if API key is present
+        # Try LLM grounding via OpenAI gpt-4o-mini if API key is present
         if settings.OPENAI_API_KEY:
             llm_reply = self._call_openai(user_question, faq_q, faq_a, category)
-            if llm_reply:
-                return llm_reply
-
-        if settings.GROQ_API_KEY:
-            llm_reply = self._call_groq(user_question, faq_q, faq_a, category)
-            if llm_reply:
-                return llm_reply
-
-        if settings.GEMINI_API_KEY:
-            llm_reply = self._call_gemini(user_question, faq_q, faq_a, category)
             if llm_reply:
                 return llm_reply
 
@@ -71,46 +61,6 @@ Provide a polite, natural, and accurate answer based strictly on the retrieved i
                 return data["choices"][0]["message"]["content"].strip()
         except Exception as e:
             logger.error(f"OpenAI response generation failed: {e}")
-        return None
-
-    def _call_groq(self, user_q: str, faq_q: str, faq_a: str, category: str) -> Optional[str]:
-        try:
-            headers = {
-                "Authorization": f"Bearer {settings.GROQ_API_KEY}",
-                "Content-Type": "application/json"
-            }
-            model = settings.GROQ_MODEL or "llama-3.1-8b-instant"
-            payload = {
-                "model": model,
-                "messages": [
-                    {"role": "system", "content": "You are a grounded FAQ assistant. Answer strictly based on the provided FAQ answer."},
-                    {"role": "user", "content": f"FAQ Context: {faq_a}\n\nQuestion: {user_q}"}
-                ],
-                "temperature": 0.2,
-                "max_tokens": 250
-            }
-            resp = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers, timeout=10)
-            if resp.status_code == 200:
-                return resp.json()["choices"][0]["message"]["content"].strip()
-        except Exception as e:
-            logger.error(f"Groq generation failed: {e}")
-        return None
-
-    def _call_gemini(self, user_q: str, faq_q: str, faq_a: str, category: str) -> Optional[str]:
-        try:
-            model = settings.GEMINI_MODEL or "gemini-1.5-flash"
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={settings.GEMINI_API_KEY}"
-            prompt = f"You are a helpful customer support assistant. Answer strictly based on this FAQ answer: {faq_a}\n\nUser Question: {user_q}"
-            payload = {
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"temperature": 0.2, "maxOutputTokens": 300}
-            }
-            resp = requests.post(url, json=payload, timeout=10)
-            if resp.status_code == 200:
-                data = resp.json()
-                return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-        except Exception as e:
-            logger.error(f"Gemini generation failed: {e}")
         return None
 
 response_writer = ResponseWriter()

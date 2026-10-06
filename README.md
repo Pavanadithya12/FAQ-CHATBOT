@@ -11,10 +11,8 @@
 | Component | Model Name | Provider | Details |
 | :--- | :--- | :--- | :--- |
 | **Vector Embedding Model** | `text-embedding-3-small` | OpenAI | Encodes questions into **1500 dimensions** for Pinecone vector search |
-| **Response Generation (LLM)** | `gpt-4o-mini` | OpenAI | Generates grounded, hallucination-free answers from matched FAQs |
-| **Alternative Fast LLM** | `llama-3.1-8b-instant` | Groq | Ultra-low latency fallback (~300 tokens/sec) |
-| **Alternative Multimodal LLM** | `gemini-1.5-flash` | Google | High-efficiency Google AI alternative |
-| **Offline Vectorizer Fallback** | Deterministic N-Gram Hash | Built-in | 1500-dim vectorizer running 100% offline without API keys |
+| **Response Generation (LLM)** | `gpt-4o-mini` | OpenAI | Generates grounded, hallucination-free answers strictly from matched FAQs |
+| **Offline Vectorizer Fallback** | Deterministic N-Gram Hash | Built-in | 1500-dim vectorizer running 100% offline without third-party API keys |
 
 ---
 
